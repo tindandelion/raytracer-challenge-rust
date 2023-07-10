@@ -2,16 +2,20 @@ use overload::overload;
 use std::ops;
 
 #[derive(PartialEq, Debug)]
-struct Color(f64, f64, f64);
+pub struct Color(pub f64, pub f64, pub f64);
 
 overload!((a: ?Color) + (b: ?Color) -> Color { Color(a.0 + b.0, a.1 + b.1, a.2 + b.2) });
 overload!((a: ?Color) - (b: ?Color) -> Color { Color(a.0 - b.0, a.1 - b.1, a.2 - b.2) });
 overload!((a: ?Color) * (c: f64) -> Color { Color(a.0 * c, a.1 * c, a.2 * c) });
 overload!((a: ?Color) * (b: ?Color) -> Color { Color(a.0 * b.0, a.1 * b.1, a.2 * b.2) });
 
+impl Color {
+    pub const BLACK: Color = Color(0., 0., 0.);
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::color::*;
+    use super::*;
 
     #[test]
     fn color_arithmetic() {

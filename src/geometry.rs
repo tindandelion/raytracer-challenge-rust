@@ -42,7 +42,7 @@ impl Vector {
 
 #[cfg(test)]
 mod tests {
-    use crate::geometry::*;
+    use super::*;
 
     #[test]
     fn add_vector_and_point() {
