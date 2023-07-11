@@ -1,33 +1,30 @@
 use crate::color::Color;
 
 struct Canvas {
-    pixels: Vec<Vec<Color>>,
+    width: usize,
+    height: usize,
+    pixels: Vec<Color>,
 }
 
 impl Canvas {
     fn new(width: usize, height: usize) -> Canvas {
-        let mut pixels: Vec<Vec<Color>> = Vec::with_capacity(height);
-        for _ in 0..height {
-            let mut row: Vec<Color> = Vec::with_capacity(width);
-            for _ in 0..width {
-                row.push(Color::BLACK)
-            }
-            pixels.push(row)
+        let mut pixels: Vec<Color> = Vec::with_capacity(width * height);
+        for _ in 0..pixels.capacity() {
+            pixels.push(Color::BLACK)
         }
-
-        Canvas { pixels }
+        Canvas {
+            width,
+            height,
+            pixels,
+        }
     }
 
-    fn width(&self) -> usize {
-        self.pixels[0].len()
+    fn write_pixel(&mut self, x: usize, y: usize, color: &Color) {
+        self.pixels[y * self.width + x] = color.clone();
     }
 
-    fn height(&self) -> usize {
-        self.pixels.len()
-    }
-
-    fn pixels(&self) -> &Vec<Vec<Color>> {
-        &self.pixels
+    fn pixel_at(&self, x: usize, y: usize) -> Color {
+        self.pixels[y * self.width + x].clone()
     }
 }
 
@@ -40,12 +37,10 @@ mod tests {
     fn create_canvas() {
         let cnv = Canvas::new(10, 20);
 
-        assert_eq!(cnv.width(), 10);
-        assert_eq!(cnv.height(), 20);
-        for row in cnv.pixels() {
-            for pix in row {
-                assert_eq!(pix, &Color(0., 0., 0.))
-            }
+        assert_eq!(cnv.width, 10);
+        assert_eq!(cnv.height, 20);
+        for pix in cnv.pixels {
+            assert_eq!(pix, Color::BLACK)
         }
     }
 
@@ -53,6 +48,8 @@ mod tests {
     fn write_pixel_to_canvas() {
         let mut canvas = Canvas::new(10, 20);
         let red = Color(1., 0., 0.);
-        todo!("Not yet implemented");
+
+        canvas.write_pixel(2, 3, &red);
+        assert_eq!(canvas.pixel_at(2, 3), red);
     }
 }
