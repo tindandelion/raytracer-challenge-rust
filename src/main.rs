@@ -1,5 +1,3 @@
-use std::fs::File;
-
 use canvas::Canvas;
 use color::Color;
 use ppm::PpmFile;
