@@ -74,9 +74,8 @@ mod tests {
     fn write_ppm_header() {
         let canvas = Canvas::new(5, 3);
 
-        let mut output =
-            PpmWriter::write_file(tempfile(), &canvas).expect("Unable to write the file");
-        let header = read_file_lines(&mut output);
+        let output = PpmWriter::write_file(tempfile(), &canvas).expect("Unable to write the file");
+        let header = read_file_lines(output);
         assert_eq!(header[0..3], vec!["P3", "5 3", "255"])
     }
 
@@ -85,9 +84,9 @@ mod tests {
         let mut canvas = Canvas::new(10, 2);
 
         canvas.fill(&Color(1., 0.8, 0.6));
-        let mut output = PpmWriter::write_file(tempfile(), &canvas).unwrap();
+        let output = PpmWriter::write_file(tempfile(), &canvas).unwrap();
 
-        let content = read_file_lines(&mut output);
+        let content = read_file_lines(output);
         let pixel_data = &content[3..content.len() - 1];
         let counts: usize = pixel_data.iter().map(|line| line.split(' ').count()).sum();
         assert_eq!(10 * 2 * 3, counts);
@@ -98,8 +97,8 @@ mod tests {
         let mut canvas = Canvas::new(10, 2);
         canvas.fill(&Color(1., 0.8, 0.6));
 
-        let mut output = PpmWriter::write_file(tempfile(), &canvas).unwrap();
-        let content = read_file_lines(&mut output);
+        let output = PpmWriter::write_file(tempfile(), &canvas).unwrap();
+        let content = read_file_lines(output);
         assert_eq!(
             content[3..7],
             vec![
@@ -115,12 +114,12 @@ mod tests {
     fn finish_file_with_newline() {
         let canvas = Canvas::new(1, 1);
 
-        let mut output = PpmWriter::write_file(tempfile(), &canvas).unwrap();
-        let content = read_file_lines(&mut output);
+        let output = PpmWriter::write_file(tempfile(), &canvas).unwrap();
+        let content = read_file_lines(output);
         assert_eq!(content.last(), Some(&"".to_string()));
     }
 
-    fn read_file_lines(f: &mut File) -> Vec<String> {
+    fn read_file_lines(mut f: File) -> Vec<String> {
         f.seek(SeekFrom::Start(0)).unwrap();
 
         let mut content = String::new();
