@@ -1,6 +1,6 @@
 use canvas::Canvas;
 use color::Color;
-use ppm::PpmFile;
+use ppm::PpmWriter;
 
 mod canvas;
 mod color;
@@ -19,5 +19,5 @@ fn main() {
         }
     }
 
-    PpmFile::write("test-output.ppm", &canvas).unwrap();
+    PpmWriter::write("test-output.ppm", &canvas).unwrap();
 }
