@@ -4,15 +4,22 @@ use std::io::Write;
 use crate::canvas::Canvas;
 use crate::color::Color;
 
-struct PpmFile;
+pub struct PpmFile;
 
 type WriteResult = Result<(), std::io::Error>;
 
 impl PpmFile {
-    fn write(file: &mut File, canvas: &Canvas) -> WriteResult {
+    const MAX_LINE_LENGTH: usize = 70;
+
+    pub fn write(filename: &str, canvas: &Canvas) -> WriteResult {
+        let mut file = File::create(filename)?;
+        PpmFile::write_file(&mut file, canvas)
+    }
+
+    fn write_file(file: &mut File, canvas: &Canvas) -> WriteResult {
         PpmFile::write_header(file, canvas.width(), canvas.height())?;
         PpmFile::write_pixels(file, canvas.pixels())?;
-        PpmFile::finish_file(file)
+        PpmFile::write_newline(file)
     }
 
     fn write_header(file: &mut File, width: usize, height: usize) -> WriteResult {
@@ -20,7 +27,7 @@ impl PpmFile {
         file.write_all(header.as_bytes())
     }
 
-    fn finish_file(file: &mut File) -> WriteResult {
+    fn write_newline(file: &mut File) -> WriteResult {
         writeln!(file, "")
     }
 
@@ -33,13 +40,12 @@ impl PpmFile {
                 to_int(pixel.1),
                 to_int(pixel.2)
             );
-            if line.len() + pixel_str.len() >= 70 {
+            if line.len() + pixel_str.len() >= PpmFile::MAX_LINE_LENGTH {
                 file.write_all(line.trim().as_bytes())?;
-                writeln!(file, "")?;
+                PpmFile::write_newline(file)?;
                 line = String::new()
-            } else {
-                line += &pixel_str;
             }
+            line += &pixel_str;
         }
         file.write_all(line.trim().as_bytes())
     }
@@ -65,9 +71,23 @@ mod tests {
         let mut output = tempfile().unwrap();
         let canvas = Canvas::new(5, 3);
 
-        PpmFile::write(&mut output, &canvas).expect("Unable to write the file");
+        PpmFile::write_file(&mut output, &canvas).expect("Unable to write the file");
         let header = read_file_lines(&mut output);
         assert_eq!(header[0..3], vec!["P3", "5 3", "255"])
+    }
+
+    #[test]
+    fn pixel_data() {
+        let mut output = tempfile().unwrap();
+        let mut canvas = Canvas::new(10, 2);
+
+        canvas.fill(&Color(1., 0.8, 0.6));
+
+        PpmFile::write_file(&mut output, &canvas).unwrap();
+        let content = read_file_lines(&mut output);
+        let pixel_data = &content[3..content.len() - 1];
+        let counts: usize = pixel_data.iter().map(|line| line.split(' ').count()).sum();
+        assert_eq!(10 * 2 * 3, counts);
     }
 
     #[test]
@@ -77,7 +97,7 @@ mod tests {
 
         canvas.fill(&Color(1., 0.8, 0.6));
 
-        PpmFile::write(&mut output, &canvas).unwrap();
+        PpmFile::write_file(&mut output, &canvas).unwrap();
         let content = read_file_lines(&mut output);
         assert_eq!(
             content[3..7],
@@ -85,7 +105,7 @@ mod tests {
                 "255 204 153 255 204 153 255 204 153 255 204 153 255 204 153",
                 "255 204 153 255 204 153 255 204 153 255 204 153 255 204 153",
                 "255 204 153 255 204 153 255 204 153 255 204 153 255 204 153",
-                "255 204 153 255 204 153"
+                "255 204 153 255 204 153 255 204 153 255 204 153 255 204 153"
             ]
         );
     }
@@ -95,7 +115,7 @@ mod tests {
         let mut output = tempfile().unwrap();
         let canvas = Canvas::new(1, 1);
 
-        PpmFile::write(&mut output, &canvas).unwrap();
+        PpmFile::write_file(&mut output, &canvas).unwrap();
         let content = read_file_lines(&mut output);
         assert_eq!(content.last(), Some(&"".to_string()));
     }

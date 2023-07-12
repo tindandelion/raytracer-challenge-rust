@@ -11,6 +11,7 @@ overload!((a: ?Color) * (b: ?Color) -> Color { Color(a.0 * b.0, a.1 * b.1, a.2 *
 
 impl Color {
     pub const BLACK: Color = Color(0., 0., 0.);
+    pub const WHITE: Color = Color(1., 1., 1.);
 
     pub fn clone(&self) -> Color {
         Color(self.0, self.1, self.2)
