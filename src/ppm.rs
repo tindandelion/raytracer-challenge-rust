@@ -13,12 +13,6 @@ type WriteResult = Result<(), std::io::Error>;
 impl PpmWriter {
     const MAX_LINE_LENGTH: usize = 70;
 
-    pub fn write(filename: &str, canvas: &Canvas) -> WriteResult {
-        let file = File::create(filename)?;
-        Self::write_file(file, canvas)?;
-        Ok(())
-    }
-
     fn write_file(file: File, canvas: &Canvas) -> Result<File, std::io::Error> {
         let mut ppm = PpmWriter { file };
         ppm.write_header(canvas.width(), canvas.height())?;
@@ -54,6 +48,12 @@ impl PpmWriter {
     fn write_newline(&mut self) -> WriteResult {
         writeln!(self.file, "")
     }
+}
+
+pub fn write_ppm(filename: &str, canvas: &Canvas) -> WriteResult {
+    File::create(filename)
+        .and_then(|file| PpmWriter::write_file(file, canvas))
+        .and(Ok(()))
 }
 
 fn to_int(color_channel: f64) -> u8 {
