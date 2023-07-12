@@ -4,11 +4,17 @@ use std::io::Write;
 use crate::canvas::Canvas;
 use crate::color::Color;
 
-pub struct PpmWriter {
-    file: File,
+type WriteResult = Result<(), std::io::Error>;
+
+pub fn write_ppm(filename: &str, canvas: &Canvas) -> WriteResult {
+    File::create(filename)
+        .and_then(|file| PpmWriter::write_file(file, canvas))
+        .and(Ok(()))
 }
 
-type WriteResult = Result<(), std::io::Error>;
+struct PpmWriter {
+    file: File,
+}
 
 impl PpmWriter {
     const MAX_LINE_LENGTH: usize = 70;
@@ -27,20 +33,17 @@ impl PpmWriter {
     }
 
     fn write_pixels(&mut self, pixels: &[Color]) -> WriteResult {
+        let bytes = pixels.iter().flat_map(|pix| [pix.0, pix.1, pix.2]);
         let mut line = String::new();
-        for pixel in pixels {
-            let pixel_str = format!(
-                "{} {} {} ",
-                to_int(pixel.0),
-                to_int(pixel.1),
-                to_int(pixel.2)
-            );
-            if line.len() + pixel_str.len() >= Self::MAX_LINE_LENGTH {
+
+        for byte in bytes {
+            let byte_str = format!("{} ", to_int(byte));
+            if line.len() + byte_str.len() >= Self::MAX_LINE_LENGTH {
                 self.file.write_all(line.trim().as_bytes())?;
                 self.write_newline()?;
                 line = String::new()
             }
-            line += &pixel_str;
+            line += &byte_str;
         }
         self.file.write_all(line.trim().as_bytes())
     }
@@ -48,12 +51,6 @@ impl PpmWriter {
     fn write_newline(&mut self) -> WriteResult {
         writeln!(self.file, "")
     }
-}
-
-pub fn write_ppm(filename: &str, canvas: &Canvas) -> WriteResult {
-    File::create(filename)
-        .and_then(|file| PpmWriter::write_file(file, canvas))
-        .and(Ok(()))
 }
 
 fn to_int(color_channel: f64) -> u8 {
@@ -81,15 +78,13 @@ mod tests {
 
     #[test]
     fn pixel_data() {
-        let mut canvas = Canvas::new(10, 2);
-
-        canvas.fill(&Color(1., 0.8, 0.6));
+        let canvas = Canvas::new(10, 2);
         let output = PpmWriter::write_file(tempfile(), &canvas).unwrap();
 
         let content = read_file_lines(output);
         let pixel_data = &content[3..content.len() - 1];
-        let counts: usize = pixel_data.iter().map(|line| line.split(' ').count()).sum();
-        assert_eq!(10 * 2 * 3, counts);
+        let bytes_written: usize = pixel_data.iter().flat_map(|line| line.split(' ')).count();
+        assert_eq!(10 * 2 * 3, bytes_written);
     }
 
     #[test]
@@ -102,10 +97,10 @@ mod tests {
         assert_eq!(
             content[3..7],
             vec![
-                "255 204 153 255 204 153 255 204 153 255 204 153 255 204 153",
-                "255 204 153 255 204 153 255 204 153 255 204 153 255 204 153",
-                "255 204 153 255 204 153 255 204 153 255 204 153 255 204 153",
-                "255 204 153 255 204 153 255 204 153 255 204 153 255 204 153"
+                "255 204 153 255 204 153 255 204 153 255 204 153 255 204 153 255 204",
+                "153 255 204 153 255 204 153 255 204 153 255 204 153 255 204 153 255",
+                "204 153 255 204 153 255 204 153 255 204 153 255 204 153 255 204 153",
+                "255 204 153 255 204 153 255 204 153"
             ]
         );
     }
