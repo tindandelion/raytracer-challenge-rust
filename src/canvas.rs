@@ -23,8 +23,8 @@ impl Canvas {
         self.pixels[y * self.width + x] = color.clone();
     }
 
-    fn pixel_at(&self, x: usize, y: usize) -> Color {
-        self.pixels[y * self.width + x].clone()
+    fn pixel_at(&self, x: usize, y: usize) -> &Color {
+        &self.pixels[y * self.width + x]
     }
 }
 
@@ -50,6 +50,6 @@ mod tests {
         let red = Color(1., 0., 0.);
 
         canvas.write_pixel(2, 3, &red);
-        assert_eq!(canvas.pixel_at(2, 3), red);
+        assert_eq!(canvas.pixel_at(2, 3), &red);
     }
 }

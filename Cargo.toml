@@ -7,3 +7,4 @@ edition = "2021"
 
 [dependencies]
 overload = "0.1.1"
+tempfile = "3"
