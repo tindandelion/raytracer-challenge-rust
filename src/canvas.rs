@@ -1,13 +1,13 @@
 use crate::color::Color;
 
-struct Canvas {
+pub struct Canvas {
     width: usize,
     height: usize,
     pixels: Vec<Color>,
 }
 
 impl Canvas {
-    fn new(width: usize, height: usize) -> Canvas {
+    pub fn new(width: usize, height: usize) -> Canvas {
         let mut pixels: Vec<Color> = Vec::with_capacity(width * height);
         for _ in 0..pixels.capacity() {
             pixels.push(Color::BLACK)
@@ -19,7 +19,25 @@ impl Canvas {
         }
     }
 
-    fn write_pixel(&mut self, x: usize, y: usize, color: &Color) {
+    pub fn width(&self) -> usize {
+        self.width
+    }
+
+    pub fn height(&self) -> usize {
+        self.height
+    }
+
+    pub fn pixels(&self) -> &Vec<Color> {
+        &self.pixels
+    }
+
+    pub fn fill(&mut self, color: &Color) {
+        for i in 0..self.pixels.len() {
+            self.pixels[i] = color.clone();
+        }
+    }
+
+    pub fn write_pixel(&mut self, x: usize, y: usize, color: &Color) {
         self.pixels[y * self.width + x] = color.clone();
     }
 
