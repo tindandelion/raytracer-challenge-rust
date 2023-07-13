@@ -14,7 +14,7 @@ fn main() {
     for x in 0..canvas.width() {
         for y in 0..canvas.height() {
             if x == y {
-                canvas.write_pixel(x, y, &Color(0., 1.0, 0.))
+                canvas.write_pixel(x, y, &Color::new(0., 1.0, 0.))
             }
         }
     }

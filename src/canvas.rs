@@ -65,7 +65,7 @@ mod tests {
     #[test]
     fn write_pixel_to_canvas() {
         let mut canvas = Canvas::new(10, 20);
-        let red = Color(1., 0., 0.);
+        let red = Color::new(1., 0., 0.);
 
         canvas.write_pixel(2, 3, &red);
         assert_eq!(canvas.pixel_at(2, 3), &red);

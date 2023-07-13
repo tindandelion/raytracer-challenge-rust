@@ -33,7 +33,7 @@ impl PpmWriter {
     }
 
     fn write_pixels(&mut self, pixels: &[Color]) -> WriteResult {
-        let bytes = pixels.iter().flat_map(|pix| [pix.0, pix.1, pix.2]);
+        let bytes = pixels.iter().flat_map(|pix| pix.to_a());
         let mut line = String::new();
 
         for byte in bytes {
@@ -90,7 +90,7 @@ mod tests {
     #[test]
     fn write_pixel_data_splitting_long_lines() {
         let mut canvas = Canvas::new(10, 2);
-        canvas.fill(&Color(1., 0.8, 0.6));
+        canvas.fill(&Color::new(1., 0.8, 0.6));
 
         let output = PpmWriter::write_file(tempfile(), &canvas).unwrap();
         let content = read_file_lines(output);

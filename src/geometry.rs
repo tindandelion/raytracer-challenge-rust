@@ -2,7 +2,7 @@ use overload::overload;
 use std::ops;
 
 #[derive(PartialEq, Debug)]
-struct Vector(f64, f64, f64);
+pub struct Vector(pub f64, pub f64, pub f64);
 #[derive(PartialEq, Debug)]
 struct Point(f64, f64, f64);
 
@@ -19,19 +19,19 @@ overload!((a: ?Vector) - (b: ?Vector) -> Vector { -b + a });
 overload!((v: ?Vector) * (c: f64) -> Vector { Vector(v.0 *c, v.1 * c, v.2 * c)});
 
 impl Vector {
-    fn magnitude(&self) -> f64 {
+    pub fn magnitude(&self) -> f64 {
         self.dot(self).sqrt()
     }
 
-    fn normalize(&self) -> Vector {
+    pub fn normalize(&self) -> Vector {
         self * (1. / self.magnitude())
     }
 
-    fn dot(&self, v: &Vector) -> f64 {
+    pub fn dot(&self, v: &Vector) -> f64 {
         self.0 * v.0 + self.1 * v.1 + self.2 * v.2
     }
 
-    fn cross(&self, v: &Vector) -> Vector {
+    pub fn cross(&self, v: &Vector) -> Vector {
         Vector(
             self.1 * v.2 - self.2 * v.1,
             self.2 * v.0 - self.0 * v.2,
