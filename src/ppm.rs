@@ -12,19 +12,18 @@ pub fn write_ppm(filename: &str, canvas: &Canvas) -> WriteResult {
         .and(Ok(()))
 }
 
-struct PpmWriter {
-    file: File,
+struct PpmWriter<'a> {
+    file: &'a File,
 }
 
-impl PpmWriter {
+impl PpmWriter<'_> {
     const MAX_LINE_LENGTH: usize = 70;
 
     fn write_file(file: File, canvas: &Canvas) -> Result<File, std::io::Error> {
-        let mut ppm = PpmWriter { file };
+        let mut ppm = PpmWriter { file: &file };
         ppm.write_header(canvas.width(), canvas.height())?;
         ppm.write_pixels(canvas.pixels())?;
-        ppm.write_newline()?;
-        Ok(ppm.file)
+        Ok(file)
     }
 
     fn write_header(&mut self, width: usize, height: usize) -> WriteResult {
@@ -33,22 +32,25 @@ impl PpmWriter {
     }
 
     fn write_pixels(&mut self, pixels: &[Color]) -> WriteResult {
-        let bytes = pixels.iter().flat_map(|pix| pix.to_a());
-        let mut line = String::new();
+        let bytes = pixels
+            .iter()
+            .flat_map(|pix| pix.to_a())
+            .map(|channel| to_int(channel));
 
+        let mut line = String::new();
         for byte in bytes {
-            let byte_str = format!("{} ", to_int(byte));
+            let byte_str = format!("{} ", byte);
             if line.len() + byte_str.len() >= Self::MAX_LINE_LENGTH {
-                self.file.write_all(line.trim().as_bytes())?;
-                self.write_newline()?;
+                self.write_line(&line)?;
                 line = String::new()
             }
             line += &byte_str;
         }
-        self.file.write_all(line.trim().as_bytes())
+        self.write_line(&line)
     }
 
-    fn write_newline(&mut self) -> WriteResult {
+    fn write_line(&mut self, line: &str) -> WriteResult {
+        self.file.write_all(line.trim().as_bytes())?;
         writeln!(self.file, "")
     }
 }
