@@ -4,7 +4,7 @@ use std::ops;
 #[derive(PartialEq, Debug)]
 pub struct Vector(pub f64, pub f64, pub f64);
 #[derive(PartialEq, Debug)]
-struct Point(f64, f64, f64);
+pub struct Point(pub f64, pub f64, pub f64);
 
 overload!(- (a: ?Vector) -> Vector { Vector(-a.0, -a.1, -a.2) });
 

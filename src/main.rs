@@ -1,5 +1,6 @@
 use canvas::Canvas;
 use color::Color;
+use geometry::Point;
 use ppm::write_ppm;
 
 mod canvas;
@@ -7,16 +8,31 @@ mod color;
 mod geometry;
 mod ppm;
 
+const CLOCK_RADIUS: usize = 100;
+const CANVAS_SIZE: usize = CLOCK_RADIUS * 2 + 20;
+
+fn calc_hour_position(hour: i32) -> Point {
+    Point(1., 0., 0.)
+}
+
+fn to_canvas_coord(v: f64) -> usize {
+    (v * (CLOCK_RADIUS as f64) + (CANVAS_SIZE as f64) / 2.0).round() as usize
+}
+
+fn to_canvas_point(hour_pos: &Point) -> (usize, usize) {
+    let Point(x, y, _) = hour_pos;
+    (to_canvas_coord(*x), to_canvas_coord(-y))
+}
+
 fn main() {
-    let mut canvas = Canvas::new(200, 200);
+    let hour_mark_color = Color::BLACK;
+    let mut canvas = Canvas::new(CANVAS_SIZE, CANVAS_SIZE);
     canvas.fill(&Color::WHITE);
 
-    for x in 0..canvas.width() {
-        for y in 0..canvas.height() {
-            if x == y {
-                canvas.write_pixel(x, y, &Color::new(0., 1.0, 0.))
-            }
-        }
+    for hour in 0..12 {
+        let hour_pos = calc_hour_position(hour);
+        let (x, y) = to_canvas_point(&hour_pos);
+        canvas.write_pixel(x, y, &hour_mark_color)
     }
 
     write_ppm("output/test-output.ppm", &canvas).unwrap();
