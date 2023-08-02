@@ -19,5 +19,5 @@ fn main() {
         }
     }
 
-    write_ppm("test-output.ppm", &canvas).unwrap();
+    write_ppm("output/test-output.ppm", &canvas).unwrap();
 }
