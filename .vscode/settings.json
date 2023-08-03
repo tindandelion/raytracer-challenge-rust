@@ -1,5 +1,5 @@
 {
   "editor.inlayHints.enabled": "offUnlessPressed",
   "editor.inlayHints.padding": false,
-  "cSpell.words": ["tempdir", "tempfile"]
+  "cSpell.words": ["rustfmt", "tempdir", "tempfile"]
 }

@@ -1,18 +1,26 @@
+use std::f64::consts::PI;
+
 use canvas::Canvas;
 use color::Color;
 use geometry::Point;
 use ppm::write_ppm;
+use transform::Transform;
 
 mod canvas;
 mod color;
 mod geometry;
 mod ppm;
+mod transform;
 
 const CLOCK_RADIUS: usize = 100;
 const CANVAS_SIZE: usize = CLOCK_RADIUS * 2 + 20;
 
 fn calc_hour_position(hour: i32) -> Point {
-    Point(1., 0., 0.)
+    let angle = PI / 6. * (hour as f64);
+    let transform = Transform::rotate_z(angle);
+
+    let twelve = Point(0., 1., 0.);
+    transform * twelve
 }
 
 fn to_canvas_coord(v: f64) -> usize {
