@@ -32,10 +32,7 @@ impl PpmWriter<'_> {
     }
 
     fn write_pixels(&mut self, pixels: &[Color]) -> WriteResult {
-        let bytes = pixels
-            .iter()
-            .flat_map(|pix| pix.to_a())
-            .map(|channel| to_int(channel));
+        let bytes = pixels.iter().flat_map(|pix| pix.to_a()).map(to_int);
 
         let mut line = String::new();
         for byte in bytes {
