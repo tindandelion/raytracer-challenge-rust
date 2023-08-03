@@ -3,14 +3,13 @@ use std::f64::consts::PI;
 use canvas::Canvas;
 use color::Color;
 use geometry::Point;
+use geometry::Transform;
 use ppm::write_ppm;
-use transform::Transform;
 
 mod canvas;
 mod color;
 mod geometry;
 mod ppm;
-mod transform;
 
 const CLOCK_RADIUS: usize = 100;
 const CANVAS_SIZE: usize = CLOCK_RADIUS * 2 + 20;
@@ -33,7 +32,7 @@ fn to_canvas_point(hour_pos: &Point) -> (usize, usize) {
 }
 
 fn main() {
-    let hour_mark_color = Color::BLACK;
+    let hour_mark_color = Color::new(1., 0., 0.);
     let mut canvas = Canvas::new(CANVAS_SIZE, CANVAS_SIZE);
     canvas.fill(&Color::WHITE);
 
