@@ -1,13 +1,12 @@
 use std::f64::consts::PI;
 
-use canvas::Canvas;
-use color::Color;
+use drawing::Canvas;
+use drawing::Color;
 use geometry::Point;
 use geometry::Transform;
 use ppm::write_ppm;
 
-mod canvas;
-mod color;
+mod drawing;
 mod geometry;
 mod ppm;
 

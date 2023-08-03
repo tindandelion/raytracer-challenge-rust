@@ -1,8 +1,8 @@
 use std::fs::File;
 use std::io::Write;
 
-use crate::canvas::Canvas;
-use crate::color::Color;
+use crate::drawing::Canvas;
+use crate::drawing::Color;
 
 type WriteResult = Result<(), std::io::Error>;
 
@@ -61,7 +61,6 @@ fn to_int(color_channel: f64) -> u8 {
 
 #[cfg(test)]
 mod tests {
-    use crate::canvas::Canvas;
 
     use super::*;
     use std::fs::File;

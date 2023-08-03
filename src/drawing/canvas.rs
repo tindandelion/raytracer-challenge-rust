@@ -1,4 +1,4 @@
-use crate::color::Color;
+use super::Color;
 
 pub struct Canvas {
     width: usize,
@@ -49,7 +49,6 @@ impl Canvas {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::color::Color;
 
     #[test]
     fn create_canvas() {
