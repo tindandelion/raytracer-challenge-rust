@@ -14,9 +14,9 @@ impl Transform {
         #[rustfmt::skip]    
         let matrix = [
             angle_z.cos(), -angle_z.sin(), 0., 0., 
-            angle_z.sin(), angle_z.cos(), 0., 0., 
-            0., 0., 1., 0., 
-            0., 0., 0., 1.
+            angle_z.sin(),  angle_z.cos(), 0., 0., 
+            0.,             0.,            1., 0., 
+            0.,             0.,            0., 1.
         ];
         Transform { matrix }
     }
