@@ -9,6 +9,7 @@ use ppm::write_ppm;
 mod drawing;
 mod geometry;
 mod ppm;
+mod raycaster;
 
 const CLOCK_RADIUS: usize = 100;
 const CANVAS_SIZE: usize = CLOCK_RADIUS * 2 + 20;

@@ -18,9 +18,15 @@ overload!((a: ?Vector) - (b: ?Vector) -> Vector { -b + a });
 
 overload!((v: ?Vector) * (c: f64) -> Vector { Vector(v.0 *c, v.1 * c, v.2 * c)});
 
+const UNIT_LENGTH_TOLERANCE: f64 = 1e-6;
+
 impl Vector {
     pub fn magnitude(&self) -> f64 {
         self.dot(self).sqrt()
+    }
+
+    pub fn is_unit(&self) -> bool {
+        (self.magnitude() - 1.0).abs() <= UNIT_LENGTH_TOLERANCE
     }
 
     pub fn normalize(&self) -> Vector {
@@ -123,7 +129,17 @@ mod tests {
         assert_eq!(
             Vector(1., 2., 2.).normalize(),
             Vector(1. / 3., 2. / 3., 2. / 3.)
-        )
+        );
+    }
+
+    #[test]
+    fn test_if_vector_is_unit() {
+        assert!(!Vector(4., 0., 0.).is_unit(), "Non-unit vector");
+        assert!(Vector(1., 0., 0.).is_unit(), "Unit vector by default");
+        assert!(
+            Vector(1., 1., 0.).normalize().is_unit(),
+            "Vector after normalization"
+        );
     }
 
     #[test]
