@@ -21,8 +21,12 @@ overload!((v: ?Vector) * (c: f64) -> Vector { Vector(v.0 *c, v.1 * c, v.2 * c)})
 const UNIT_LENGTH_TOLERANCE: f64 = 1e-6;
 
 impl Vector {
+    pub fn magnitude_squared(&self) -> f64 {
+        self.dot(self)
+    }
+
     pub fn magnitude(&self) -> f64 {
-        self.dot(self).sqrt()
+        self.magnitude_squared().sqrt()
     }
 
     pub fn is_unit(&self) -> bool {

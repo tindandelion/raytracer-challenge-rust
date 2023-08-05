@@ -1,7 +1,7 @@
 use crate::geometry::{Point, Vector};
 
 pub struct Ray<'a> {
-    origin: &'a Point,
+    pub origin: &'a Point,
     direction: &'a Vector,
 }
 
@@ -15,6 +15,10 @@ impl<'a> Ray<'a> {
 
     pub fn position(&self, distance: f64) -> Point {
         self.origin + self.direction * distance
+    }
+
+    pub fn scalar_projection_of(&self, v: &Vector) -> f64 {
+        self.direction.dot(v)
     }
 }
 
@@ -47,5 +51,28 @@ mod tests {
         assert_eq!(Point(3., 3., 4.), ray.position(1.));
         assert_eq!(Point(1., 3., 4.), ray.position(-1.));
         assert_eq!(Point(4.5, 3., 4.), ray.position(2.5));
+    }
+
+    #[test]
+    fn compute_vector_projection() {
+        let origin = Point(2., 3., 4.);
+        let direction = Vector(1., 0., 0.);
+        let ray = Ray::new(&origin, &direction);
+
+        assert_eq!(
+            ray.scalar_projection_of(&Vector(1., 1., 0.)),
+            1.,
+            "Arbitrary vector"
+        );
+        assert_eq!(
+            ray.scalar_projection_of(&Vector(0., 1., 0.)),
+            0.,
+            "Orthogonal vector"
+        );
+        assert_eq!(
+            ray.scalar_projection_of(&Vector(-1., 0., 0.)),
+            -1.,
+            "Opposite direction vector"
+        );
     }
 }

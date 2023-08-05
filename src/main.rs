@@ -8,6 +8,7 @@ use ppm::write_ppm;
 
 mod drawing;
 mod geometry;
+mod intersect_sphere;
 mod ppm;
 mod raycaster;
 
