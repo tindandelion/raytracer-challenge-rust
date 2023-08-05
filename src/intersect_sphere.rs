@@ -7,7 +7,7 @@ impl Sphere {
         Sphere
     }
 
-    fn intersect(&self, r: Ray) -> Vec<f64> {
+    fn intersect_with(&self, r: Ray) -> Vec<f64> {
         let sphere_center = Point(0., 0., 0.);
         let sphere_radius = 1.0;
         let sphere_to_ray = r.origin - sphere_center;
@@ -24,7 +24,7 @@ impl Sphere {
 fn solve_quadratic_equation(a: f64, b: f64, c: f64) -> Option<(f64, f64)> {
     let d = b * b - 4. * a * c;
     if d < 0. {
-        return None;
+        None
     } else {
         let sqrt_d = d.sqrt();
         let x1 = (-b - sqrt_d) / (2. * a);
@@ -78,7 +78,7 @@ mod tests {
 
         fn intersections_with_ray_from_origin(origin: Point) -> Vec<f64> {
             let ray = Ray::new(&origin, &Z_AXIS);
-            SPHERE.intersect(ray)
+            SPHERE.intersect_with(ray)
         }
     }
 }
