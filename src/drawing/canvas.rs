@@ -7,6 +7,9 @@ pub struct Canvas {
 }
 
 impl Canvas {
+    pub fn square(size: usize) -> Canvas {
+        Self::new(size, size)
+    }
     pub fn new(width: usize, height: usize) -> Canvas {
         let mut pixels: Vec<Color> = Vec::with_capacity(width * height);
         for _ in 0..pixels.capacity() {

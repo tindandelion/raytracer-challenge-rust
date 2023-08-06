@@ -1,13 +1,13 @@
 use crate::{geometry::Point, raycaster::Ray};
 
-struct Sphere;
+pub struct Sphere;
 
 impl Sphere {
-    const fn unit() -> Sphere {
+    pub const fn unit() -> Sphere {
         Sphere
     }
 
-    fn intersect_with(&self, r: Ray) -> Vec<f64> {
+    pub fn intersect_with(&self, r: &Ray) -> Vec<f64> {
         let sphere_center = Point(0., 0., 0.);
         let sphere_radius = 1.0;
         let sphere_to_ray = r.origin - sphere_center;
@@ -78,7 +78,7 @@ mod tests {
 
         fn intersections_with_ray_from_origin(origin: Point) -> Vec<f64> {
             let ray = Ray::new(&origin, &Z_AXIS);
-            SPHERE.intersect_with(ray)
+            SPHERE.intersect_with(&ray)
         }
     }
 }

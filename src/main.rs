@@ -4,7 +4,9 @@ use drawing::Canvas;
 use drawing::Color;
 use geometry::Point;
 use geometry::Transform;
+use intersect_sphere::Sphere;
 use ppm::write_ppm;
+use raycaster::Ray;
 
 mod drawing;
 mod geometry;
@@ -12,35 +14,40 @@ mod intersect_sphere;
 mod ppm;
 mod raycaster;
 
-const CLOCK_RADIUS: usize = 100;
-const CANVAS_SIZE: usize = CLOCK_RADIUS * 2 + 20;
-
-fn calc_hour_position(hour: i32) -> Point {
-    let angle = PI / 6. * (hour as f64);
-    let transform = Transform::rotate_z(angle);
-
-    let twelve = Point(0., 1., 0.);
-    transform * twelve
+fn half_wall_size(ray_origin: &Point, wall_z: f64) -> f64 {
+    let ray_z = ray_origin.2.abs();
+    (wall_z + ray_z) / ray_z + 0.5
 }
 
-fn to_canvas_coord(v: f64) -> usize {
-    (v * (CLOCK_RADIUS as f64) + (CANVAS_SIZE as f64) / 2.0).round() as usize
+fn has_hit(r: &Ray, shape: &Sphere) -> bool {
+    let intersections = shape.intersect_with(r);
+    !intersections.is_empty()
 }
 
-fn to_canvas_point(hour_pos: &Point) -> (usize, usize) {
-    let Point(x, y, _) = hour_pos;
-    (to_canvas_coord(*x), to_canvas_coord(-y))
-}
+const CANVAS_SIZE: usize = 200;
+const WALL_Z: f64 = 10.0;
 
 fn main() {
-    let hour_mark_color = Color::new(1., 0., 0.);
-    let mut canvas = Canvas::new(CANVAS_SIZE, CANVAS_SIZE);
-    canvas.fill(&Color::WHITE);
+    let color = Color::new(1., 0., 0.);
+    let ray_origin = Point(0., 0., -5.0);
+    let sphere = Sphere::unit();
 
-    for hour in 0..12 {
-        let hour_pos = calc_hour_position(hour);
-        let (x, y) = to_canvas_point(&hour_pos);
-        canvas.write_pixel(x, y, &hour_mark_color)
+    let half_wall = half_wall_size(&ray_origin, WALL_Z);
+    let pixel_size = (half_wall * 2.) / (CANVAS_SIZE as f64);
+
+    let mut canvas = Canvas::square(CANVAS_SIZE);
+    for y in 0..CANVAS_SIZE {
+        let world_y = half_wall - pixel_size * (y as f64);
+        for x in 0..CANVAS_SIZE {
+            let world_x = -half_wall + pixel_size * (x as f64);
+            let position = Point(world_x, world_y, WALL_Z);
+            let ray_direction = (position - &ray_origin).normalize();
+            let r = Ray::new(&ray_origin, &ray_direction);
+
+            if has_hit(&r, &sphere) {
+                canvas.write_pixel(x, y, &color);
+            }
+        }
     }
 
     write_ppm("output/test-output.ppm", &canvas).unwrap();
