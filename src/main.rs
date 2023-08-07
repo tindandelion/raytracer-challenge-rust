@@ -1,9 +1,6 @@
-use std::f64::consts::PI;
-
 use drawing::Canvas;
 use drawing::Color;
 use geometry::Point;
-use geometry::Transform;
 use intersect_sphere::Sphere;
 use ppm::write_ppm;
 use raycaster::Ray;
@@ -14,41 +11,67 @@ mod intersect_sphere;
 mod ppm;
 mod raycaster;
 
-fn half_wall_size(ray_origin: &Point, wall_z: f64) -> f64 {
-    let ray_z = ray_origin.2.abs();
-    (wall_z + ray_z) / ray_z + 0.5
+type CanvasPoint = (usize, usize);
+
+struct Raycaster {
+    origin: Point,
+    wall_z: f64,
 }
 
-fn has_hit(r: &Ray, shape: &Sphere) -> bool {
-    let intersections = shape.intersect_with(r);
-    !intersections.is_empty()
-}
+impl Raycaster {
+    fn new(origin: Point, wall_z: f64) -> Raycaster {
+        Raycaster { origin, wall_z }
+    }
 
-const CANVAS_SIZE: usize = 200;
-const WALL_Z: f64 = 10.0;
-
-fn main() {
-    let color = Color::new(1., 0., 0.);
-    let ray_origin = Point(0., 0., -5.0);
-    let sphere = Sphere::unit();
-
-    let half_wall = half_wall_size(&ray_origin, WALL_Z);
-    let pixel_size = (half_wall * 2.) / (CANVAS_SIZE as f64);
-
-    let mut canvas = Canvas::square(CANVAS_SIZE);
-    for y in 0..CANVAS_SIZE {
-        let world_y = half_wall - pixel_size * (y as f64);
-        for x in 0..CANVAS_SIZE {
-            let world_x = -half_wall + pixel_size * (x as f64);
-            let position = Point(world_x, world_y, WALL_Z);
-            let ray_direction = (position - &ray_origin).normalize();
-            let r = Ray::new(&ray_origin, &ray_direction);
-
-            if has_hit(&r, &sphere) {
-                canvas.write_pixel(x, y, &color);
-            }
+    fn scan(&self, canvas_size: usize, mut f: impl FnMut(&CanvasPoint, &Ray) -> ()) {
+        for (canvas_point, world_point) in self.generate_world_points(canvas_size) {
+            let ray_direction = (world_point - &self.origin).normalize();
+            let ray = Ray::new(&self.origin, &ray_direction);
+            f(&canvas_point, &ray);
         }
     }
 
+    fn generate_world_points(
+        &self,
+        canvas_size: usize,
+    ) -> impl Iterator<Item = (CanvasPoint, Point)> + '_ {
+        let half_wall = self.half_wall_size();
+        let pixel_size = (half_wall * 2.) / (canvas_size as f64);
+
+        (0..canvas_size)
+            .map(move |y| {
+                let world_y = half_wall - pixel_size * (y as f64);
+                (y, world_y)
+            })
+            .flat_map(move |(y, world_y)| {
+                (0..canvas_size).map(move |x| {
+                    let world_x = -half_wall + pixel_size * (x as f64);
+                    let position = Point(world_x, world_y, self.wall_z);
+                    ((x, y), position)
+                })
+            })
+    }
+
+    fn half_wall_size(&self) -> f64 {
+        let ray_z = &self.origin.2.abs();
+        (self.wall_z + ray_z) / ray_z + 0.5
+    }
+}
+
+fn has_hit(r: &Ray, shape: &Sphere) -> bool {
+    !shape.intersect_with(r).is_empty()
+}
+
+fn main() {
+    let color = Color::new(1., 0., 0.);
+    let sphere = Sphere::unit();
+    let raycaster = Raycaster::new(Point(0., 0., -5.0), 10.0);
+
+    let mut canvas = Canvas::square(200);
+    raycaster.scan(canvas.width(), |canvas_point, ray| {
+        if has_hit(&ray, &sphere) {
+            canvas.write_pixel(canvas_point.0, canvas_point.1, &color);
+        }
+    });
     write_ppm("output/test-output.ppm", &canvas).unwrap();
 }
