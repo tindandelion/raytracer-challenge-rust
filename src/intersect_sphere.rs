@@ -1,19 +1,27 @@
-use crate::{geometry::Point, raycaster::Ray};
+use crate::{
+    geometry::{Point, Vector},
+    raycaster::Ray,
+};
 
 pub struct Sphere;
 
 impl Sphere {
+    const CENTER: Point = Point::ZERO;
+    const RADIUS: f64 = 1.0;
+
     pub const fn unit() -> Sphere {
         Sphere
     }
 
+    pub fn normal_at(&self, pt: &Point) -> Vector {
+        (pt - Self::CENTER).normalize()
+    }
+
     pub fn intersect_with(&self, r: &Ray) -> Vec<f64> {
-        let sphere_center = Point(0., 0., 0.);
-        let sphere_radius = 1.0;
-        let sphere_to_ray = r.origin - sphere_center;
+        let sphere_to_ray = r.origin - Self::CENTER;
 
         let b = 2. * r.scalar_projection_of(&sphere_to_ray);
-        let c = sphere_to_ray.magnitude_squared() - sphere_radius;
+        let c = sphere_to_ray.magnitude_squared() - Self::RADIUS;
 
         solve_quadratic_equation(1., b, c)
             .map(|(x1, x2)| vec![x1, x2])
@@ -37,14 +45,51 @@ fn solve_quadratic_equation(a: f64, b: f64, c: f64) -> Option<(f64, f64)> {
 mod tests {
     use crate::geometry::Vector;
 
+    use super::Sphere;
+
+    static SPHERE: Sphere = Sphere::unit();
     static Z_AXIS: Vector = Vector(0., 0., 1.);
 
-    mod unit_sphere {
-        use super::super::Sphere;
-        use super::Z_AXIS;
-        use crate::{geometry::Point, raycaster::Ray};
+    mod normals {
+        use super::SPHERE;
 
-        static SPHERE: Sphere = Sphere::unit();
+        use crate::geometry::{Point, Vector};
+
+        #[test]
+        fn normal_towards_x_axis() {
+            let n = SPHERE.normal_at(&Point(1., 0., 0.));
+            assert_eq!(n, Vector(1., 0., 0.));
+        }
+
+        #[test]
+        fn normal_towards_y_axis() {
+            let n = SPHERE.normal_at(&Point(0., 1., 0.));
+            assert_eq!(n, Vector(0., 1., 0.));
+        }
+
+        #[test]
+        fn normal_towards_z_axis() {
+            let n = SPHERE.normal_at(&Point(0., 0., 1.));
+            assert_eq!(n, Vector(0., 0., 1.));
+        }
+
+        #[test]
+        fn normal_at_non_axial_point() {
+            let sqrt_3 = 3.0_f64.sqrt();
+            let n = SPHERE.normal_at(&Point(sqrt_3 / 3., sqrt_3 / 3., sqrt_3 / 3.));
+            assert_eq!(n, Vector(sqrt_3 / 3., sqrt_3 / 3., sqrt_3 / 3.))
+        }
+
+        #[test]
+        fn normal_is_unit_length() {
+            let n = SPHERE.normal_at(&Point(1., 1., 1.));
+            assert!(n.is_unit())
+        }
+    }
+
+    mod intersection {
+        use super::{SPHERE, Z_AXIS};
+        use crate::{geometry::Point, raycaster::Ray};
 
         #[test]
         fn ray_misses_sphere() {

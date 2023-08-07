@@ -20,6 +20,10 @@ overload!((v: ?Vector) * (c: f64) -> Vector { Vector(v.0 *c, v.1 * c, v.2 * c)})
 
 const UNIT_LENGTH_TOLERANCE: f64 = 1e-6;
 
+impl Point {
+    pub const ZERO: Point = Point(0., 0., 0.);
+}
+
 impl Vector {
     pub fn magnitude_squared(&self) -> f64 {
         self.dot(self)
