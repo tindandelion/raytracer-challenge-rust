@@ -5,6 +5,11 @@ use crate::{
 
 pub struct Sphere;
 
+#[derive(PartialEq, Debug)]
+pub struct Normal {
+    direction: Vector,
+}
+
 impl Sphere {
     const CENTER: Point = Point::ZERO;
     const RADIUS: f64 = 1.0;
@@ -13,8 +18,8 @@ impl Sphere {
         Sphere
     }
 
-    pub fn normal_at(&self, pt: &Point) -> Vector {
-        (pt - Self::CENTER).normalize()
+    pub fn normal_at(&self, pt: &Point) -> Normal {
+        Normal::from(&(pt - Self::CENTER))
     }
 
     pub fn intersect_with(&self, r: &Ray) -> Vec<f64> {
@@ -26,6 +31,18 @@ impl Sphere {
         solve_quadratic_equation(1., b, c)
             .map(|(x1, x2)| vec![x1, x2])
             .unwrap_or(vec![])
+    }
+}
+
+impl Normal {
+    fn from(v: &Vector) -> Normal {
+        Normal {
+            direction: v.normalize(),
+        }
+    }
+
+    fn new(x: f64, y: f64, z: f64) -> Normal {
+        Self::from(&Vector(x, y, z))
     }
 }
 
@@ -50,7 +67,8 @@ mod tests {
     static SPHERE: Sphere = Sphere::unit();
     static Z_AXIS: Vector = Vector(0., 0., 1.);
 
-    mod normals {
+    mod sphere_normals {
+        use super::super::Normal;
         use super::SPHERE;
 
         use crate::geometry::{Point, Vector};
@@ -58,32 +76,26 @@ mod tests {
         #[test]
         fn normal_towards_x_axis() {
             let n = SPHERE.normal_at(&Point(1., 0., 0.));
-            assert_eq!(n, Vector(1., 0., 0.));
+            assert_eq!(n, Normal::new(1., 0., 0.));
         }
 
         #[test]
         fn normal_towards_y_axis() {
             let n = SPHERE.normal_at(&Point(0., 1., 0.));
-            assert_eq!(n, Vector(0., 1., 0.));
+            assert_eq!(n, Normal::new(0., 1., 0.));
         }
 
         #[test]
         fn normal_towards_z_axis() {
             let n = SPHERE.normal_at(&Point(0., 0., 1.));
-            assert_eq!(n, Vector(0., 0., 1.));
+            assert_eq!(n, Normal::new(0., 0., 1.));
         }
 
         #[test]
         fn normal_at_non_axial_point() {
             let sqrt_3 = 3.0_f64.sqrt();
             let n = SPHERE.normal_at(&Point(sqrt_3 / 3., sqrt_3 / 3., sqrt_3 / 3.));
-            assert_eq!(n, Vector(sqrt_3 / 3., sqrt_3 / 3., sqrt_3 / 3.))
-        }
-
-        #[test]
-        fn normal_is_unit_length() {
-            let n = SPHERE.normal_at(&Point(1., 1., 1.));
-            assert!(n.is_unit())
+            assert_eq!(n, Normal::new(sqrt_3 / 3., sqrt_3 / 3., sqrt_3 / 3.))
         }
     }
 
