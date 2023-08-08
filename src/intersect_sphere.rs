@@ -1,14 +1,9 @@
 use crate::{
-    geometry::{Point, Vector},
+    geometry::{Normal, Point},
     raycaster::Ray,
 };
 
 pub struct Sphere;
-
-#[derive(PartialEq, Debug)]
-pub struct Normal {
-    direction: Vector,
-}
 
 impl Sphere {
     const CENTER: Point = Point::ZERO;
@@ -31,18 +26,6 @@ impl Sphere {
         solve_quadratic_equation(1., b, c)
             .map(|(x1, x2)| vec![x1, x2])
             .unwrap_or(vec![])
-    }
-}
-
-impl Normal {
-    fn from(v: &Vector) -> Normal {
-        Normal {
-            direction: v.normalize(),
-        }
-    }
-
-    fn new(x: f64, y: f64, z: f64) -> Normal {
-        Self::from(&Vector(x, y, z))
     }
 }
 
@@ -71,7 +54,7 @@ mod tests {
         use super::super::Normal;
         use super::SPHERE;
 
-        use crate::geometry::{Point, Vector};
+        use crate::geometry::Point;
 
         #[test]
         fn normal_towards_x_axis() {
