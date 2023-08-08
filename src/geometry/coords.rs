@@ -1,7 +1,7 @@
 use overload::overload;
 use std::ops;
 
-#[derive(PartialEq, Debug)]
+#[derive(Debug)]
 pub struct Vector(pub f64, pub f64, pub f64);
 #[derive(PartialEq, Debug)]
 pub struct Point(pub f64, pub f64, pub f64);
@@ -18,13 +18,13 @@ overload!((a: ?Vector) - (b: ?Vector) -> Vector { -b + a });
 
 overload!((v: ?Vector) * (c: f64) -> Vector { Vector(v.0 *c, v.1 * c, v.2 * c)});
 
-const UNIT_LENGTH_TOLERANCE: f64 = 1e-6;
-
 impl Point {
     pub const ZERO: Point = Point(0., 0., 0.);
 }
 
 impl Vector {
+    const EQUALITY_TOLERANCE: f64 = 1e-6;
+
     pub fn magnitude_squared(&self) -> f64 {
         self.dot(self)
     }
@@ -34,7 +34,7 @@ impl Vector {
     }
 
     pub fn is_unit(&self) -> bool {
-        (self.magnitude() - 1.0).abs() <= UNIT_LENGTH_TOLERANCE
+        (self.magnitude() - 1.0).abs() <= Self::EQUALITY_TOLERANCE
     }
 
     pub fn normalize(&self) -> Vector {
@@ -51,6 +51,12 @@ impl Vector {
             self.2 * v.0 - self.0 * v.2,
             self.0 * v.1 - self.1 * v.0,
         )
+    }
+}
+
+impl PartialEq for Vector {
+    fn eq(&self, other: &Self) -> bool {
+        (self - other).magnitude() <= Vector::EQUALITY_TOLERANCE
     }
 }
 
