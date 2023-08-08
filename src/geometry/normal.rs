@@ -38,7 +38,7 @@ mod tests {
     }
 
     #[test]
-    fn reflect_vector_at_45_degrees() {
+    fn reflect_vector_at_45_degrees_from_horizontal_surface() {
         let v = Vector(1., -1., 0.);
         let n = Normal::new(0., 1., 0.);
 
