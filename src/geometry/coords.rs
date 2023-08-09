@@ -20,10 +20,15 @@ overload!((v: ?Vector) * (c: f64) -> Vector { Vector(v.0 *c, v.1 * c, v.2 * c)})
 
 impl Point {
     pub const ZERO: Point = Point(0., 0., 0.);
+
+    pub fn new(x: f64, y: f64, z: f64) -> Point {
+        Point(x, y, z)
+    }
 }
 
 impl Vector {
     const EQUALITY_TOLERANCE: f64 = 1e-6;
+    pub const ZERO: Vector = Vector(0., 0., 0.);
 
     pub fn magnitude_squared(&self) -> f64 {
         self.dot(self)
@@ -97,11 +102,11 @@ mod tests {
     }
 
     #[test]
-    fn subtract_point_from_point() {
-        let left = Point(3., 2., 1.);
-        let right = Point(5., 6., 7.);
+    fn subtract_point_from_point_makes_a_vector() {
+        let dest = Point(3., 2., 1.);
+        let src = Point(5., 6., 7.);
 
-        let result = left - right;
+        let result = dest - src;
         assert_eq!(result, Vector(-2., -4., -6.))
     }
 

@@ -2,7 +2,7 @@ use crate::geometry::{Point, Vector};
 
 pub struct Ray<'a> {
     pub origin: &'a Point,
-    direction: &'a Vector,
+    pub direction: &'a Vector,
 }
 
 impl<'a> Ray<'a> {
