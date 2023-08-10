@@ -75,7 +75,7 @@ fn get_color_at(pt: &Point, shape: &Sphere, ray_direction: &Vector) -> Color {
     let color = Color::new(1., 0.2, 1.);
     let light = PointLight::new(Color::WHITE, Point::new(-10., 10., -10.));
     let normal = shape.normal_at(pt);
-    Material::default_with_color(color).lighting2(&pt, &light, &(-ray_direction), &normal)
+    Material::default_with_color(color).lighting(&light, &pt, &(-ray_direction), &normal)
 }
 
 fn main() {

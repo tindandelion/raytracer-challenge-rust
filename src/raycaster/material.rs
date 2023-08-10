@@ -24,15 +24,14 @@ impl Material {
         }
     }
 
-    pub fn lighting2(
+    pub fn lighting(
         &self,
-        position: &Point,
         light: &PointLight,
+        position: &Point,
         eye_direction: &UnitVector,
         normal: &Normal,
     ) -> Color {
         let light_direction = light.direction_from(position);
-
         let diffuse_factor = self.diffuse(&light_direction, normal);
         let specular_factor = self.specular(&light_direction, eye_direction, normal);
 
@@ -82,7 +81,7 @@ mod tests {
             let eye_d = Vector(0., 0., -1.);
             let normal = Normal::new(0., 0., -1.);
 
-            let result = MATERIAL.lighting2(&POSITION, &light, &eye_d, &normal);
+            let result = MATERIAL.lighting(&light, &POSITION, &eye_d, &normal);
             assert_eq!(result, Color::new(1.9, 1.9, 1.9))
         }
 
@@ -92,7 +91,7 @@ mod tests {
             let eye_d = Vector(0., 1., -1.).normalize();
             let normal = Normal::new(0., 0., -1.);
 
-            let result = MATERIAL.lighting2(&POSITION, &light, &eye_d, &normal);
+            let result = MATERIAL.lighting(&light, &POSITION, &eye_d, &normal);
             assert_eq!(result, Color::new(1.0, 1.0, 1.0))
         }
 
@@ -102,7 +101,7 @@ mod tests {
             let eye_d = Vector(0., 0., -1.);
             let normal = Normal::new(0., 0., -1.);
 
-            let result = MATERIAL.lighting2(&POSITION, &light, &eye_d, &normal);
+            let result = MATERIAL.lighting(&light, &POSITION, &eye_d, &normal);
             assert_eq!(result, Color::new(0.7364, 0.7364, 0.7364))
         }
 
@@ -112,7 +111,7 @@ mod tests {
             let eye_d = Vector(0., -1., -1.).normalize();
             let normal = Normal::new(0., 0., -1.);
 
-            let result = MATERIAL.lighting2(&POSITION, &light, &eye_d, &normal);
+            let result = MATERIAL.lighting(&light, &POSITION, &eye_d, &normal);
             assert_eq!(result, Color::new(1.6364, 1.6364, 1.6364))
         }
 
@@ -122,7 +121,7 @@ mod tests {
             let eye_d = Vector(0., 0., -1.);
             let normal = Normal::new(0., 0., -1.);
 
-            let result = MATERIAL.lighting2(&POSITION, &light, &eye_d, &normal);
+            let result = MATERIAL.lighting(&light, &POSITION, &eye_d, &normal);
             assert_eq!(result, Color::new(0.1, 0.1, 0.1))
         }
 
@@ -132,7 +131,7 @@ mod tests {
             let eye_d = Vector(0., 1., -1.).normalize();
             let normal = Normal::new(0., 0., -1.);
 
-            let result = MATERIAL.lighting2(&POSITION, &light, &eye_d, &normal);
+            let result = MATERIAL.lighting(&light, &POSITION, &eye_d, &normal);
             assert_eq!(result, Color::new(1., 0., 0.))
         }
 
@@ -143,7 +142,7 @@ mod tests {
             let eye_d = Vector(0., 1., -1.).normalize();
             let normal = Normal::new(0., 0., -1.);
 
-            let result = material.lighting2(&POSITION, &light, &eye_d, &normal);
+            let result = material.lighting(&light, &POSITION, &eye_d, &normal);
             assert_eq!(result, Color::new(1., 0., 0.))
         }
     }
