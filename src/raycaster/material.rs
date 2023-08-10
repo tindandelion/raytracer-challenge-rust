@@ -25,43 +25,39 @@ impl Material {
     pub fn lighting(
         &self,
         light_direction: &UnitVector,
-        eye_direction: &Vector,
+        eye_direction: &UnitVector,
         normal: &Normal,
     ) -> Color {
         let light_intensity = Color::WHITE;
 
-        let effective_color = &self.color * &light_intensity;
-        let diffuse = self.diffuse(light_direction, normal);
-        let specular = self.specular(light_direction, eye_direction, normal);
+        let diffuse_factor = self.diffuse(light_direction, normal);
+        let specular_factor = self.specular(light_direction, eye_direction, normal);
 
-        &effective_color * (self.ambient + diffuse) + light_intensity * specular
+        let effective_color = &light_intensity * &self.color * (self.ambient + diffuse_factor);
+        &effective_color + &light_intensity * specular_factor
     }
 
     fn diffuse(&self, light_direction: &UnitVector, normal: &Normal) -> f64 {
-        let mut diffuse = 0.;
-
         let light_dot_normal = normal.dot(light_direction);
-        if light_dot_normal >= 0. {
-            diffuse = self.diffuse * light_dot_normal;
+        if light_dot_normal < 0. {
+            return 0.;
         }
-        diffuse
+        self.diffuse * light_dot_normal
     }
 
     fn specular(
         &self,
         light_direction: &UnitVector,
-        eye_direction: &Vector,
+        eye_direction: &UnitVector,
         normal: &Normal,
     ) -> f64 {
-        let mut specular = 0.;
-
-        let reflection = normal.reflect(&(-light_direction));
+        let reflection = normal.reflect(light_direction);
         let reflect_dot_eye = (eye_direction).dot(&reflection);
-        if reflect_dot_eye > 0. {
-            let factor = reflect_dot_eye.powi(self.shininess);
-            specular = self.specular * factor;
+        if (reflect_dot_eye) <= 0. {
+            return 0.;
         }
-        specular
+        let factor = reflect_dot_eye.powi(self.shininess);
+        self.specular * factor
     }
 }
 

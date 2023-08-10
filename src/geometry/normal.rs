@@ -17,7 +17,7 @@ impl Normal {
     }
 
     pub fn reflect(&self, incoming: &Vector) -> Vector {
-        incoming - &self.direction * 2. * incoming.dot(&self.direction)
+        -incoming + &self.direction * 2. * incoming.dot(&self.direction)
     }
 }
 
@@ -43,16 +43,16 @@ mod tests {
 
     #[test]
     fn reflect_vector_at_45_degrees_from_horizontal_surface() {
-        let v = Vector(1., -1., 0.);
+        let v = Vector(1., 1., 0.);
         let n = Normal::new(0., 1., 0.);
 
         let r = n.reflect(&v);
-        assert_eq!(r, Vector(1., 1., 0.));
+        assert_eq!(r, Vector(-1., 1., 0.));
     }
 
     #[test]
     fn reflect_off_slanted_surface() {
-        let v = Vector(0., -1., 0.);
+        let v = Vector(0., 1., 0.);
         let n = Normal::new(SQRT_2 / 2., SQRT_2 / 2., 0.);
 
         let r = n.reflect(&v);
