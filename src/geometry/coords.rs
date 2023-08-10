@@ -5,6 +5,7 @@ use std::ops;
 pub struct Vector(pub f64, pub f64, pub f64);
 #[derive(PartialEq, Debug)]
 pub struct Point(pub f64, pub f64, pub f64);
+pub type UnitVector = Vector;
 
 overload!(- (a: ?Vector) -> Vector { Vector(-a.0, -a.1, -a.2) });
 
@@ -42,7 +43,7 @@ impl Vector {
         (self.magnitude() - 1.0).abs() <= Self::EQUALITY_TOLERANCE
     }
 
-    pub fn normalize(&self) -> Vector {
+    pub fn normalize(&self) -> UnitVector {
         self * (1. / self.magnitude())
     }
 

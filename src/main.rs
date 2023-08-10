@@ -1,9 +1,12 @@
 use drawing::Canvas;
 use drawing::Color;
+use geometry::Normal;
 use geometry::Point;
+use geometry::UnitVector;
 use geometry::Vector;
 use intersect_sphere::Sphere;
 use ppm::write_ppm;
+use raycaster::Material;
 use raycaster::Ray;
 
 mod drawing;
@@ -71,13 +74,9 @@ fn hit_point(r: &Ray, shape: &Sphere) -> Option<Point> {
 
 fn get_color_at(pt: &Point, shape: &Sphere, eye_direction: &Vector) -> Color {
     let light_position = Point::new(-10., 10., -10.);
-    let normal = shape.normal_at(pt);
     let light_vector = (pt - &light_position).normalize();
-    let reflection = normal.reflect(&light_vector);
-
-    let cos_alpha = eye_direction.dot(&reflection);
-    let luminosity = cos_alpha.max(0.);
-    Color::new(luminosity, 0., 0.) + Color::new(0.1, 0., 0.)
+    let normal = shape.normal_at(pt);
+    Material::default().lighting(&light_vector, eye_direction, &normal)
 }
 
 fn main() {
@@ -92,29 +91,4 @@ fn main() {
         }
     });
     write_ppm("output/test-output.ppm", &canvas).unwrap();
-}
-
-#[cfg(test)]
-mod tests {
-    use crate::{geometry::Point, intersect_sphere::Sphere, raycaster::Ray};
-
-    #[test]
-    fn calc_lighting_at_point() {
-        let shape = Sphere::unit();
-        let light_position = Point::new(-3., 3., 0.);
-        let eye_position = Point::new(-3., 0., 0.);
-        let eye_direction = (Point(0., 0.5, 0.) - &eye_position).normalize();
-
-        let ray = Ray::new(&eye_position, &eye_direction);
-        let intersections = shape.intersect_with(&ray);
-        let hit_distance = *intersections.first().unwrap();
-        let hit_point = ray.position(hit_distance);
-
-        let light_direction = (&hit_point - &light_position).normalize();
-        let normal = shape.normal_at(&hit_point);
-        let reflection_direction = normal.reflect(&light_direction);
-        let cos_alpha = (-eye_direction).dot(&reflection_direction);
-
-        assert_eq!(cos_alpha, 0.);
-    }
 }
