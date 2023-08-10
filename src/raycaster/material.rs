@@ -1,7 +1,9 @@
 use crate::{
     drawing::Color,
-    geometry::{Normal, UnitVector},
+    geometry::{Normal, Point, UnitVector},
 };
+
+use super::PointLight;
 
 pub struct Material {
     color: Color,
@@ -12,9 +14,9 @@ pub struct Material {
 }
 
 impl Material {
-    pub const fn default() -> Material {
+    pub const fn default_with_color(color: Color) -> Material {
         Material {
-            color: Color::WHITE,
+            color,
             ambient: 0.1,
             diffuse: 0.9,
             specular: 0.9,
@@ -22,19 +24,20 @@ impl Material {
         }
     }
 
-    pub fn lighting(
+    pub fn lighting2(
         &self,
-        light_direction: &UnitVector,
+        position: &Point,
+        light: &PointLight,
         eye_direction: &UnitVector,
         normal: &Normal,
     ) -> Color {
-        let light_intensity = Color::WHITE;
+        let light_direction = light.direction_from(position);
 
-        let diffuse_factor = self.diffuse(light_direction, normal);
-        let specular_factor = self.specular(light_direction, eye_direction, normal);
+        let diffuse_factor = self.diffuse(&light_direction, normal);
+        let specular_factor = self.specular(&light_direction, eye_direction, normal);
 
-        let effective_color = &light_intensity * &self.color * (self.ambient + diffuse_factor);
-        &effective_color + &light_intensity * specular_factor
+        let effective_color = &light.intensity * &self.color * (self.ambient + diffuse_factor);
+        &effective_color + &light.intensity * specular_factor
     }
 
     fn diffuse(&self, light_direction: &UnitVector, normal: &Normal) -> f64 {
@@ -66,66 +69,82 @@ mod tests {
     mod default_material_lighting {
         use crate::{
             drawing::Color,
-            geometry::{Normal, Vector},
-            raycaster::Material,
+            geometry::{Normal, Point, Vector},
+            raycaster::{Material, PointLight},
         };
 
-        const MATERIAL: Material = Material::default();
+        const MATERIAL: Material = Material::default_with_color(Color::WHITE);
+        const POSITION: Point = Point::ZERO;
 
         #[test]
         fn light_strictly_behind_observer() {
-            let light_d = Vector(0., 0., -10.).normalize();
+            let light = PointLight::new(Color::WHITE, Point::new(0., 0., -10.));
             let eye_d = Vector(0., 0., -1.);
             let normal = Normal::new(0., 0., -1.);
 
-            assert_eq!(
-                0.9,
-                MATERIAL.specular(&light_d, &eye_d, &normal),
-                "Specular"
-            );
-
-            let result = MATERIAL.lighting(&light_d, &eye_d, &normal);
+            let result = MATERIAL.lighting2(&POSITION, &light, &eye_d, &normal);
             assert_eq!(result, Color::new(1.9, 1.9, 1.9))
         }
 
         #[test]
         fn light_behind_observer_with_observer_offset() {
-            let light_d = Vector(0., 0., -10.).normalize();
+            let light = PointLight::new(Color::WHITE, Point::new(0., 0., -10.));
             let eye_d = Vector(0., 1., -1.).normalize();
             let normal = Normal::new(0., 0., -1.);
 
-            let result = MATERIAL.lighting(&light_d, &eye_d, &normal);
+            let result = MATERIAL.lighting2(&POSITION, &light, &eye_d, &normal);
             assert_eq!(result, Color::new(1.0, 1.0, 1.0))
         }
 
         #[test]
         fn observer_opposite_surface_with_light_offset() {
-            let light_d = Vector(0., 10., -10.).normalize();
+            let light = PointLight::new(Color::WHITE, Point::new(0., 10., -10.));
             let eye_d = Vector(0., 0., -1.);
             let normal = Normal::new(0., 0., -1.);
 
-            let result = MATERIAL.lighting(&light_d, &eye_d, &normal);
+            let result = MATERIAL.lighting2(&POSITION, &light, &eye_d, &normal);
             assert_eq!(result, Color::new(0.7364, 0.7364, 0.7364))
         }
 
         #[test]
         fn observer_in_path_of_reflection_vector() {
-            let light_d = Vector(0., 10., -10.).normalize();
+            let light = PointLight::new(Color::WHITE, Point::new(0., 10., -10.));
             let eye_d = Vector(0., -1., -1.).normalize();
             let normal = Normal::new(0., 0., -1.);
 
-            let result = MATERIAL.lighting(&light_d, &eye_d, &normal);
+            let result = MATERIAL.lighting2(&POSITION, &light, &eye_d, &normal);
             assert_eq!(result, Color::new(1.6364, 1.6364, 1.6364))
         }
 
         #[test]
         fn light_behind_surface() {
-            let light_d = Vector(0., 0., 10.).normalize();
+            let light = PointLight::new(Color::WHITE, Point::new(0., 0., 10.));
             let eye_d = Vector(0., 0., -1.);
             let normal = Normal::new(0., 0., -1.);
 
-            let result = MATERIAL.lighting(&light_d, &eye_d, &normal);
+            let result = MATERIAL.lighting2(&POSITION, &light, &eye_d, &normal);
             assert_eq!(result, Color::new(0.1, 0.1, 0.1))
+        }
+
+        #[test]
+        fn use_light_intensity_to_calculate_result() {
+            let light = PointLight::new(Color::new(1., 0., 0.), Point::new(0., 0., -10.));
+            let eye_d = Vector(0., 1., -1.).normalize();
+            let normal = Normal::new(0., 0., -1.);
+
+            let result = MATERIAL.lighting2(&POSITION, &light, &eye_d, &normal);
+            assert_eq!(result, Color::new(1., 0., 0.))
+        }
+
+        #[test]
+        fn use_material_color_to_calculate_result() {
+            let material = Material::default_with_color(Color::new(1., 0., 0.));
+            let light = PointLight::new(Color::WHITE, Point::new(0., 0., -10.));
+            let eye_d = Vector(0., 1., -1.).normalize();
+            let normal = Normal::new(0., 0., -1.);
+
+            let result = material.lighting2(&POSITION, &light, &eye_d, &normal);
+            assert_eq!(result, Color::new(1., 0., 0.))
         }
     }
 }

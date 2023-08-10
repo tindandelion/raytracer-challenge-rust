@@ -22,7 +22,7 @@ overload!((v: ?Vector) * (c: f64) -> Vector { Vector(v.0 *c, v.1 * c, v.2 * c)})
 impl Point {
     pub const ZERO: Point = Point(0., 0., 0.);
 
-    pub fn new(x: f64, y: f64, z: f64) -> Point {
+    pub const fn new(x: f64, y: f64, z: f64) -> Point {
         Point(x, y, z)
     }
 }

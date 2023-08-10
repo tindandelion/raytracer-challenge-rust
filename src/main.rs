@@ -5,6 +5,7 @@ use geometry::Vector;
 use intersect_sphere::Sphere;
 use ppm::write_ppm;
 use raycaster::Material;
+use raycaster::PointLight;
 use raycaster::Ray;
 
 mod drawing;
@@ -71,10 +72,10 @@ fn hit_point(r: &Ray, shape: &Sphere) -> Option<Point> {
 }
 
 fn get_color_at(pt: &Point, shape: &Sphere, ray_direction: &Vector) -> Color {
-    let light_position = Point::new(-10., 10., -10.);
-    let light_vector = (&light_position - pt).normalize();
+    let color = Color::new(1., 0.2, 1.);
+    let light = PointLight::new(Color::WHITE, Point::new(-10., 10., -10.));
     let normal = shape.normal_at(pt);
-    Material::default().lighting(&light_vector, &(-ray_direction), &normal)
+    Material::default_with_color(color).lighting2(&pt, &light, &(-ray_direction), &normal)
 }
 
 fn main() {
