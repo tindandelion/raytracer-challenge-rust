@@ -12,10 +12,6 @@ impl Normal {
         }
     }
 
-    pub fn new(x: f64, y: f64, z: f64) -> Normal {
-        Self::from(&Vector(x, y, z))
-    }
-
     pub fn reflect(&self, incoming: &Vector) -> Vector {
         incoming - &self.direction * 2. * incoming.dot(&self.direction)
     }
@@ -23,11 +19,15 @@ impl Normal {
 
 #[cfg(test)]
 mod tests {
+    use super::Normal;
+    use crate::geometry::Vector;
     use std::f64::consts::SQRT_2;
 
-    use crate::geometry::Vector;
-
-    use super::Normal;
+    impl Normal {
+        pub fn new(x: f64, y: f64, z: f64) -> Normal {
+            Self::from(&Vector(x, y, z))
+        }
+    }
 
     #[test]
     fn create_normal_from_non_unit_vector() {
