@@ -1,8 +1,6 @@
 use drawing::Canvas;
 use drawing::Color;
-use geometry::Normal;
 use geometry::Point;
-use geometry::UnitVector;
 use geometry::Vector;
 use intersect_sphere::Sphere;
 use ppm::write_ppm;

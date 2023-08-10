@@ -1,6 +1,6 @@
 use crate::{
     drawing::Color,
-    geometry::{Normal, UnitVector, Vector},
+    geometry::{Normal, UnitVector},
 };
 
 pub struct Material {
