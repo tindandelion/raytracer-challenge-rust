@@ -3,7 +3,7 @@ use std::ops;
 
 use crate::geometry::Vector;
 
-#[derive(PartialEq, Debug)]
+#[derive(Debug)]
 pub struct Color {
     value: Vector,
 }
@@ -14,6 +14,8 @@ overload!((a: ?Color) * (c: f64) -> Color { Color { value: &a.value * c } });
 overload!((a: ?Color) * (b: ?Color) -> Color { Color { value: mul_pairwise(&a.value, &b.value) } });
 
 impl Color {
+    const EQUALITY_TOLERANCE: f64 = 0.0001;
+
     pub const BLACK: Color = Color {
         value: Vector(0., 0., 0.),
     };
@@ -21,7 +23,7 @@ impl Color {
         value: Vector(1., 1., 1.),
     };
 
-    pub fn new(r: f64, g: f64, b: f64) -> Color {
+    pub const fn new(r: f64, g: f64, b: f64) -> Color {
         Color {
             value: Vector(r, g, b),
         }
@@ -47,6 +49,13 @@ impl Color {
         Color {
             value: Vector(self.value.0, self.value.1, self.value.2),
         }
+    }
+}
+
+impl PartialEq for Color {
+    fn eq(&self, other: &Self) -> bool {
+        self.value
+            .is_approx_equal(&other.value, Color::EQUALITY_TOLERANCE)
     }
 }
 

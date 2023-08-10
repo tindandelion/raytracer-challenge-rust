@@ -72,11 +72,11 @@ fn hit_point(r: &Ray, shape: &Sphere) -> Option<Point> {
     }
 }
 
-fn get_color_at(pt: &Point, shape: &Sphere, eye_direction: &Vector) -> Color {
+fn get_color_at(pt: &Point, shape: &Sphere, ray_direction: &Vector) -> Color {
     let light_position = Point::new(-10., 10., -10.);
-    let light_vector = (pt - &light_position).normalize();
+    let light_vector = (&light_position - pt).normalize();
     let normal = shape.normal_at(pt);
-    Material::default().lighting(&light_vector, eye_direction, &normal)
+    Material::default().lighting(&light_vector, &(-ray_direction), &normal)
 }
 
 fn main() {
@@ -86,7 +86,7 @@ fn main() {
     let mut canvas = Canvas::square(200);
     raycaster.scan(canvas.width(), |ray, canvas_point| {
         if let Some(hit_point) = hit_point(&ray, &sphere) {
-            let point_color = get_color_at(&hit_point, &sphere, &(-ray.direction));
+            let point_color = get_color_at(&hit_point, &sphere, &ray.direction);
             canvas.write_pixel(canvas_point.0, canvas_point.1, &point_color);
         }
     });

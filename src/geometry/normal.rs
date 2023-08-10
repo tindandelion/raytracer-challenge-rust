@@ -12,6 +12,10 @@ impl Normal {
         }
     }
 
+    pub fn dot(&self, v: &Vector) -> f64 {
+        self.direction.dot(v)
+    }
+
     pub fn reflect(&self, incoming: &Vector) -> Vector {
         incoming - &self.direction * 2. * incoming.dot(&self.direction)
     }

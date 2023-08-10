@@ -58,11 +58,15 @@ impl Vector {
             self.0 * v.1 - self.1 * v.0,
         )
     }
+
+    pub fn is_approx_equal(&self, other: &Vector, tolerance: f64) -> bool {
+        (self - other).magnitude() <= tolerance
+    }
 }
 
 impl PartialEq for Vector {
     fn eq(&self, other: &Self) -> bool {
-        (self - other).magnitude() <= Vector::EQUALITY_TOLERANCE
+        self.is_approx_equal(other, Vector::EQUALITY_TOLERANCE)
     }
 }
 
