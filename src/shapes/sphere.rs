@@ -76,7 +76,7 @@ mod tests {
 
         #[test]
         fn normal_at_non_axial_point() {
-            let sqrt_3 = 3.0_f64.sqrt();
+            let sqrt_3 = (3.0 as f64).sqrt();
             let n = SPHERE.normal_at(&Point(sqrt_3 / 3., sqrt_3 / 3., sqrt_3 / 3.));
             assert_eq!(n, Normal::new(sqrt_3 / 3., sqrt_3 / 3., sqrt_3 / 3.))
         }

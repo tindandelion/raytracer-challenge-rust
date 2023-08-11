@@ -1,9 +1,8 @@
 use crate::{
     drawing::Color,
     geometry::{Normal, Point, UnitVector},
+    raycaster::PointLight,
 };
-
-use super::PointLight;
 
 pub struct Material {
     color: Color,
@@ -69,7 +68,8 @@ mod tests {
         use crate::{
             drawing::Color,
             geometry::{Normal, Point, Vector},
-            raycaster::{Material, PointLight},
+            raycaster::PointLight,
+            shapes::Material,
         };
 
         const MATERIAL: Material = Material::default_with_color(Color::WHITE);

@@ -2,17 +2,18 @@ use drawing::Canvas;
 use drawing::Color;
 use geometry::Point;
 use geometry::Vector;
-use intersect_sphere::Sphere;
+
 use ppm::write_ppm;
-use raycaster::Material;
 use raycaster::PointLight;
 use raycaster::Ray;
+use shapes::Material;
+use shapes::Sphere;
 
 mod drawing;
 mod geometry;
-mod intersect_sphere;
 mod ppm;
 mod raycaster;
+mod shapes;
 
 type CanvasPoint = (usize, usize);
 
