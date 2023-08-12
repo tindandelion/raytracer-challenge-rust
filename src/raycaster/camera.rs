@@ -1,6 +1,4 @@
-use crate::geometry::{Point, UnitVector, Vector};
-
-use super::Ray;
+use crate::geometry::{Point, UnitVector};
 
 pub struct Camera {
     half_view: f64,
@@ -44,7 +42,7 @@ impl Camera {
 mod tests {
     use std::f64::consts::PI;
 
-    use crate::geometry::{Point, Vector};
+    use crate::geometry::Vector;
 
     use super::Camera;
 
