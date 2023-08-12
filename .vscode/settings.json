@@ -1,5 +1,6 @@
 {
   "editor.inlayHints.enabled": "offUnlessPressed",
   "editor.inlayHints.padding": false,
-  "cSpell.words": ["consts", "raycaster", "rustfmt", "tempdir", "tempfile"]
+  "cSpell.words": ["consts", "raycaster", "rustfmt", "tempdir", "tempfile"],
+  "rust-analyzer.linkedProjects": ["./Cargo.toml"]
 }

@@ -3,7 +3,7 @@ use std::ops;
 
 #[derive(Debug)]
 pub struct Vector(pub f64, pub f64, pub f64);
-#[derive(PartialEq, Debug)]
+#[derive(Debug)]
 pub struct Point(pub f64, pub f64, pub f64);
 pub type UnitVector = Vector;
 
@@ -19,6 +19,8 @@ overload!((a: ?Vector) - (b: ?Vector) -> Vector { -b + a });
 
 overload!((v: ?Vector) * (c: f64) -> Vector { Vector(v.0 *c, v.1 * c, v.2 * c)});
 
+const EQUALITY_TOLERANCE: f64 = 1e-6;
+
 impl Point {
     pub const ZERO: Point = Point(0., 0., 0.);
 
@@ -28,7 +30,6 @@ impl Point {
 }
 
 impl Vector {
-    const EQUALITY_TOLERANCE: f64 = 1e-6;
     pub const ZERO: Vector = Vector(0., 0., 0.);
 
     pub fn magnitude_squared(&self) -> f64 {
@@ -40,7 +41,7 @@ impl Vector {
     }
 
     pub fn is_unit(&self) -> bool {
-        (self.magnitude() - 1.0).abs() <= Self::EQUALITY_TOLERANCE
+        (self.magnitude() - 1.0).abs() <= EQUALITY_TOLERANCE
     }
 
     pub fn normalize(&self) -> UnitVector {
@@ -66,7 +67,13 @@ impl Vector {
 
 impl PartialEq for Vector {
     fn eq(&self, other: &Self) -> bool {
-        self.is_approx_equal(other, Vector::EQUALITY_TOLERANCE)
+        self.is_approx_equal(other, EQUALITY_TOLERANCE)
+    }
+}
+
+impl PartialEq for Point {
+    fn eq(&self, other: &Self) -> bool {
+        (self - other).magnitude() < EQUALITY_TOLERANCE
     }
 }
 
