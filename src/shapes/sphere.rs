@@ -3,25 +3,29 @@ use crate::{
     raycaster::Ray,
 };
 
-pub struct Sphere;
+pub struct Sphere {
+    center: Point,
+    radius: f64,
+}
 
 impl Sphere {
-    const CENTER: Point = Point::ZERO;
-    const RADIUS: f64 = 1.0;
-
     pub const fn unit() -> Sphere {
-        Sphere
+        Self::new(Point::ZERO, 1.0)
+    }
+
+    pub const fn new(center: Point, radius: f64) -> Sphere {
+        Sphere { center, radius }
     }
 
     pub fn normal_at(&self, pt: &Point) -> Normal {
-        Normal::from(&(pt - Self::CENTER))
+        Normal::from(&(pt - &self.center))
     }
 
     pub fn intersect_with(&self, r: &Ray) -> Vec<f64> {
-        let sphere_to_ray = r.origin - Self::CENTER;
+        let sphere_to_ray = r.origin - &self.center;
 
         let b = 2. * r.scalar_projection_of(&sphere_to_ray);
-        let c = sphere_to_ray.magnitude_squared() - Self::RADIUS;
+        let c = sphere_to_ray.magnitude_squared() - self.radius;
 
         solve_quadratic_equation(1., b, c)
             .map(|(x1, x2)| vec![x1, x2])
