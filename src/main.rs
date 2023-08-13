@@ -1,3 +1,5 @@
+use std::f64::consts::PI;
+
 use drawing::Canvas;
 use drawing::Color;
 use geometry::Point;
@@ -20,11 +22,16 @@ type CanvasPoint = (usize, usize);
 struct Raycaster {
     origin: Point,
     wall_z: f64,
+    field_of_view: f64,
 }
 
 impl Raycaster {
     fn new(origin: Point, wall_z: f64) -> Raycaster {
-        Raycaster { origin, wall_z }
+        Raycaster {
+            origin,
+            wall_z,
+            field_of_view: PI / 2.,
+        }
     }
 
     fn scan(&self, canvas_size: usize, mut f: impl FnMut(&Ray, &CanvasPoint) -> ()) {
@@ -57,8 +64,8 @@ impl Raycaster {
     }
 
     fn half_wall_size(&self) -> f64 {
-        let ray_z = &self.origin.2.abs();
-        (self.wall_z + ray_z) / ray_z + 0.5
+        let a = (self.wall_z - self.origin.2).abs();
+        a * (self.field_of_view / 2.).atan()
     }
 }
 
@@ -74,16 +81,16 @@ fn hit_point(r: &Ray, shape: &Sphere) -> Option<Point> {
 
 fn get_color_at(pt: &Point, shape: &Sphere, ray_direction: &Vector) -> Color {
     let color = Color::new(1., 0.2, 1.);
-    let light = PointLight::new(Color::WHITE, Point::new(-10., 10., -10.));
+    let light = PointLight::new(Color::WHITE, Point::new(-10., 10., 10.));
     let normal = shape.normal_at(pt);
     Material::default_with_color(color).lighting(&light, &pt, &(-ray_direction), &normal)
 }
 
 fn main() {
-    let sphere = Sphere::unit();
-    let raycaster = Raycaster::new(Point(0., 0., -5.0), 10.0);
+    let sphere = Sphere::new(Point::new(0., 0., -0.5), 0.05);
+    let raycaster = Raycaster::new(Point(0., 0., 0.0), -1.0);
 
-    let mut canvas = Canvas::square(200);
+    let mut canvas = Canvas::square(500);
     raycaster.scan(canvas.width(), |ray, canvas_point| {
         if let Some(hit_point) = hit_point(&ray, &sphere) {
             let point_color = get_color_at(&hit_point, &sphere, &ray.direction);
