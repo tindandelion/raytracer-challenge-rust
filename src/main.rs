@@ -65,7 +65,7 @@ impl Raycaster {
 
     fn half_wall_size(&self) -> f64 {
         let a = (self.wall_z - self.origin.2).abs();
-        a * (self.field_of_view / 2.).atan()
+        a * (self.field_of_view / 2.).tan()
     }
 }
 
@@ -87,7 +87,7 @@ fn get_color_at(pt: &Point, shape: &Sphere, ray_direction: &Vector) -> Color {
 }
 
 fn main() {
-    let sphere = Sphere::new(Point::new(0., 0., -0.5), 0.05);
+    let sphere = Sphere::new(Point::new(0., 0., -0.5), 0.25);
     let raycaster = Raycaster::new(Point(0., 0., 0.0), -1.0);
 
     let mut canvas = Canvas::square(500);
