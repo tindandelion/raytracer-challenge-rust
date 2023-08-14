@@ -6,6 +6,7 @@ use geometry::Point;
 use geometry::Vector;
 
 use ppm::write_ppm;
+use raycaster::Camera;
 use raycaster::PointLight;
 use raycaster::Ray;
 use shapes::Material;
@@ -21,51 +22,26 @@ type CanvasPoint = (usize, usize);
 
 struct Raycaster {
     origin: Point,
-    wall_z: f64,
     field_of_view: f64,
 }
 
 impl Raycaster {
-    fn new(origin: Point, wall_z: f64) -> Raycaster {
+    fn new(origin: Point) -> Raycaster {
         Raycaster {
             origin,
-            wall_z,
             field_of_view: PI / 2.,
         }
     }
 
     fn scan(&self, canvas_size: usize, mut f: impl FnMut(&Ray, &CanvasPoint) -> ()) {
-        for (canvas_point, world_point) in self.generate_world_points(canvas_size) {
-            let ray_direction = (world_point - &self.origin).normalize();
-            let ray = Ray::new(&self.origin, &ray_direction);
-            f(&ray, &canvas_point);
+        let camera = Camera::new(canvas_size, canvas_size, self.field_of_view);
+        for y in 0..canvas_size {
+            for x in 0..canvas_size {
+                let ray_direction = camera.ray_direction_to(x, y);
+                let ray = Ray::new(&self.origin, &ray_direction);
+                f(&ray, &(x, y));
+            }
         }
-    }
-
-    fn generate_world_points(
-        &self,
-        canvas_size: usize,
-    ) -> impl Iterator<Item = (CanvasPoint, Point)> + '_ {
-        let half_wall = self.half_wall_size();
-        let pixel_size = (half_wall * 2.) / (canvas_size as f64);
-
-        (0..canvas_size)
-            .map(move |y| {
-                let world_y = half_wall - pixel_size * (y as f64);
-                (y, world_y)
-            })
-            .flat_map(move |(y, world_y)| {
-                (0..canvas_size).map(move |x| {
-                    let world_x = -half_wall + pixel_size * (x as f64);
-                    let position = Point(world_x, world_y, self.wall_z);
-                    ((x, y), position)
-                })
-            })
-    }
-
-    fn half_wall_size(&self) -> f64 {
-        let a = (self.wall_z - self.origin.2).abs();
-        a * (self.field_of_view / 2.).tan()
     }
 }
 
@@ -88,9 +64,9 @@ fn get_color_at(pt: &Point, shape: &Sphere, ray_direction: &Vector) -> Color {
 
 fn main() {
     let sphere = Sphere::new(Point::new(0., 0., -0.5), 0.25);
-    let raycaster = Raycaster::new(Point(0., 0., 0.0), -1.0);
+    let raycaster = Raycaster::new(Point(0., 0., 0.0));
 
-    let mut canvas = Canvas::square(500);
+    let mut canvas = Canvas::square(512);
     raycaster.scan(canvas.width(), |ray, canvas_point| {
         if let Some(hit_point) = hit_point(&ray, &sphere) {
             let point_color = get_color_at(&hit_point, &sphere, &ray.direction);

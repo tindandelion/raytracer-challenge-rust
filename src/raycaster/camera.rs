@@ -25,11 +25,11 @@ impl Camera {
         }
     }
 
-    fn ray_direction_to(&self, px: usize, py: usize) -> UnitVector {
+    pub fn ray_direction_to(&self, px: usize, py: usize) -> UnitVector {
         return (self.world_pixel_at(px, py) - Self::CAMERA_POSITION).normalize();
     }
 
-    fn world_pixel_at(&self, px: usize, py: usize) -> Point {
+    pub fn world_pixel_at(&self, px: usize, py: usize) -> Point {
         let x_offset = (px as f64 + 0.5) * self.pixel_size;
         let y_offset = (py as f64 + 0.5) * self.pixel_size;
         let world_x = -self.half_view + x_offset;
