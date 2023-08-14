@@ -25,7 +25,7 @@ impl Sphere {
         let sphere_to_ray = r.origin - &self.center;
 
         let b = 2. * r.scalar_projection_of(&sphere_to_ray);
-        let c = sphere_to_ray.magnitude_squared() - self.radius;
+        let c = sphere_to_ray.magnitude_squared() - self.radius * self.radius;
 
         solve_quadratic_equation(1., b, c)
             .map(|(x1, x2)| vec![x1, x2])
