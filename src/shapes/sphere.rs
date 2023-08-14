@@ -47,12 +47,9 @@ fn solve_quadratic_equation(a: f64, b: f64, c: f64) -> Option<(f64, f64)> {
 
 #[cfg(test)]
 mod tests {
-    use crate::geometry::Vector;
-
     use super::Sphere;
 
     static SPHERE: Sphere = Sphere::unit();
-    static Z_AXIS: Vector = Vector(0., 0., 1.);
 
     mod sphere_normals {
         use super::super::Normal;
@@ -87,8 +84,11 @@ mod tests {
     }
 
     mod intersection {
-        use super::{SPHERE, Z_AXIS};
-        use crate::{geometry::Point, raycaster::Ray};
+        use super::SPHERE;
+        use crate::{
+            geometry::{Point, Vector},
+            raycaster::Ray,
+        };
 
         #[test]
         fn ray_misses_sphere() {
@@ -121,7 +121,8 @@ mod tests {
         }
 
         fn intersections_with_ray_from_origin(origin: Point) -> Vec<f64> {
-            let ray = Ray::new(&origin, &Z_AXIS);
+            let z_axis = Vector(0., 0., 1.);
+            let ray = Ray::new(&origin, z_axis);
             SPHERE.intersect_with(&ray)
         }
     }

@@ -1,12 +1,17 @@
-use crate::geometry::{Point, Vector};
+use crate::geometry::{Point, UnitVector, Vector};
 
 pub struct Ray<'a> {
     pub origin: &'a Point,
-    pub direction: &'a Vector,
+    pub direction: UnitVector,
 }
 
 impl<'a> Ray<'a> {
-    pub fn new(origin: &'a Point, direction: &'a Vector) -> Ray<'a> {
+    pub fn between(origin: &'a Point, dest: &Point) -> Ray<'a> {
+        let direction = (dest - origin).normalize();
+        Self::new(origin, direction)
+    }
+
+    pub fn new(origin: &'a Point, direction: UnitVector) -> Ray<'a> {
         if !direction.is_unit() {
             panic!("Only allow unit length vectors as ray direction")
         }
@@ -14,7 +19,7 @@ impl<'a> Ray<'a> {
     }
 
     pub fn position(&self, distance: f64) -> Point {
-        self.origin + self.direction * distance
+        self.origin + &self.direction * distance
     }
 
     pub fn scalar_projection_of(&self, v: &Vector) -> f64 {
@@ -24,28 +29,22 @@ impl<'a> Ray<'a> {
 
 #[cfg(test)]
 mod tests {
+    use std::f64::consts::SQRT_2;
+
     use super::*;
 
     #[test]
-    fn create_ray_from_normalized_direction_vector() {
-        let origin = Point(2., 3., 4.);
-        let direction = Vector(1., 0., 0.);
-        Ray::new(&origin, &direction);
-    }
-
-    #[test]
-    #[should_panic]
-    fn disallow_creating_rays_with_non_unit_direction_vector() {
-        let origin = Point(2., 3., 4.);
-        let direction = Vector(1., 1., 0.);
-        Ray::new(&origin, &direction);
+    fn calculate_ray_direction_from_origin_to_destination() {
+        let origin = Point::ZERO;
+        let destination = Point::new(1., 1., 0.);
+        let ray = Ray::between(&origin, &destination);
+        assert_eq!(ray.direction, Vector(SQRT_2 / 2., SQRT_2 / 2., 0.))
     }
 
     #[test]
     fn compute_point_from_distance() {
         let origin = Point(2., 3., 4.);
-        let direction = Vector(1., 0., 0.);
-        let ray = Ray::new(&origin, &direction);
+        let ray = Ray::new(&origin, Vector(1., 0., 0.));
 
         assert_eq!(Point(2., 3., 4.), ray.position(0.));
         assert_eq!(Point(3., 3., 4.), ray.position(1.));
@@ -56,8 +55,7 @@ mod tests {
     #[test]
     fn compute_vector_projection() {
         let origin = Point(2., 3., 4.);
-        let direction = Vector(1., 0., 0.);
-        let ray = Ray::new(&origin, &direction);
+        let ray = Ray::new(&origin, Vector(1., 0., 0.));
 
         assert_eq!(
             ray.scalar_projection_of(&Vector(1., 1., 0.)),
