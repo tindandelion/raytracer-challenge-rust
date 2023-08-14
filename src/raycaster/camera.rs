@@ -1,5 +1,7 @@
 use crate::geometry::{Point, UnitVector};
 
+use super::Ray;
+
 pub struct Camera {
     half_view: f64,
     aspect_ratio: f64,
@@ -25,11 +27,13 @@ impl Camera {
         }
     }
 
-    pub fn ray_direction_to(&self, px: usize, py: usize) -> UnitVector {
-        return (self.world_pixel_at(px, py) - Self::CAMERA_POSITION).normalize();
+    pub fn cast_ray_at(&self, px: usize, py: usize, mut f: impl FnMut(&Ray) -> ()) {
+        let direction = (self.world_pixel_at(px, py) - Self::CAMERA_POSITION).normalize();
+        let ray = Ray::new(&Self::CAMERA_POSITION, &direction);
+        f(&ray)
     }
 
-    pub fn world_pixel_at(&self, px: usize, py: usize) -> Point {
+    fn world_pixel_at(&self, px: usize, py: usize) -> Point {
         let x_offset = (px as f64 + 0.5) * self.pixel_size;
         let y_offset = (py as f64 + 0.5) * self.pixel_size;
         let world_x = -self.half_view + x_offset;
@@ -61,15 +65,15 @@ mod tests {
     #[test]
     fn direction_to_the_canvas_center() {
         let c = Camera::new(201, 101, PI / 2.);
-        let direction = c.ray_direction_to(100, 50);
-        assert_eq!(direction, Vector(0., 0., -1.))
+        c.cast_ray_at(100, 50, |r| assert_eq!(r.direction, &Vector(0., 0., -1.)));
     }
 
     #[test]
     fn direction_to_canvas_corner() {
         let c = Camera::new(201, 101, PI / 2.);
-        let direction = c.ray_direction_to(0, 0);
-        assert_eq!(direction, Vector(-0.665186, 0.332593, -0.668512));
+        c.cast_ray_at(0, 0, |r| {
+            assert_eq!(r.direction, &Vector(-0.665186, 0.332593, -0.668512))
+        });
     }
 
     fn assert_approx_eq(left: f64, right: f64) {

@@ -18,29 +18,11 @@ mod ppm;
 mod raycaster;
 mod shapes;
 
-type CanvasPoint = (usize, usize);
-
-struct Raycaster {
-    origin: Point,
-    field_of_view: f64,
-}
-
-impl Raycaster {
-    fn new(origin: Point) -> Raycaster {
-        Raycaster {
-            origin,
-            field_of_view: PI / 2.,
-        }
-    }
-
-    fn scan(&self, canvas_size: usize, mut f: impl FnMut(&Ray, &CanvasPoint) -> ()) {
-        let camera = Camera::new(canvas_size, canvas_size, self.field_of_view);
-        for y in 0..canvas_size {
-            for x in 0..canvas_size {
-                let ray_direction = camera.ray_direction_to(x, y);
-                let ray = Ray::new(&self.origin, &ray_direction);
-                f(&ray, &(x, y));
-            }
+fn scan(canvas_size: usize, mut f: impl FnMut(&Ray, usize, usize) -> ()) {
+    let camera = Camera::new(canvas_size, canvas_size, PI / 2.);
+    for y in 0..canvas_size {
+        for x in 0..canvas_size {
+            camera.cast_ray_at(x, y, |r| f(&r, x, y));
         }
     }
 }
@@ -64,13 +46,12 @@ fn get_color_at(pt: &Point, shape: &Sphere, ray_direction: &Vector) -> Color {
 
 fn main() {
     let sphere = Sphere::new(Point::new(0., 0., -0.5), 0.25);
-    let raycaster = Raycaster::new(Point(0., 0., 0.0));
-
     let mut canvas = Canvas::square(512);
-    raycaster.scan(canvas.width(), |ray, canvas_point| {
+
+    scan(canvas.width(), |ray, px, py| {
         if let Some(hit_point) = hit_point(&ray, &sphere) {
             let point_color = get_color_at(&hit_point, &sphere, &ray.direction);
-            canvas.write_pixel(canvas_point.0, canvas_point.1, &point_color);
+            canvas.write_pixel(px, py, &point_color);
         }
     });
     write_ppm("output/test-output.ppm", &canvas).unwrap();
