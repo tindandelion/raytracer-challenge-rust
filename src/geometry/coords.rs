@@ -1,5 +1,5 @@
 use overload::overload;
-use std::ops::{self, Deref};
+use std::ops::{self};
 
 #[derive(Debug)]
 pub struct Vector(pub f64, pub f64, pub f64);
@@ -26,7 +26,7 @@ overload!((v: ?Vector) * (c: f64) -> Vector { Vector(v.0 *c, v.1 * c, v.2 * c)})
 const EQUALITY_TOLERANCE: f64 = 1e-6;
 
 impl Point {
-    pub const ZERO: Point = Point(0., 0., 0.);
+    pub const ZERO: Point = Point::new(0., 0., 0.);
 
     pub const fn new(x: f64, y: f64, z: f64) -> Point {
         Point(x, y, z)
