@@ -3,21 +3,24 @@ use std::ops::{self};
 
 #[derive(Debug)]
 pub struct Vector(pub f64, pub f64, pub f64);
-#[derive(Debug)]
-pub struct Point(pub f64, pub f64, pub f64);
 
 #[derive(Debug, PartialEq)]
 pub struct UnitVector {
     v: Vector,
 }
 
+#[derive(Debug)]
+pub struct Point {
+    v: Vector,
+}
+
 overload!(- (a: ?Vector) -> Vector { Vector(-a.0, -a.1, -a.2) });
 
-overload!((a: ?Vector) + (b: ?Point) -> Point { Point(a.0 + b.0, a.1 + b.1, a.2 + b.2) });
+overload!((a: ?Vector) + (b: ?Point) -> Point { Point::wrap_vector(a + &b.v) });
 overload!((a: ?Vector) + (b: ?Vector) -> Vector { Vector(a.0 + b.0, a.1 + b.1, a.2 + b.2) });
 overload!((a: ?Point) + (b: ?Vector) -> Point { b + a });
 
-overload!((a: ?Point) - (b: ?Point) -> Vector { Vector(a.0 - b.0, a.1 - b.1, a.2 - b.2)});
+overload!((a: ?Point) - (b: ?Point) -> Vector { &a.v - &b.v });
 overload!((a: ?Point) - (b: ?Vector) -> Point { -b + a });
 overload!((a: ?Vector) - (b: ?Vector) -> Vector { -b + a });
 
@@ -29,7 +32,11 @@ impl Point {
     pub const ZERO: Point = Point::new(0., 0., 0.);
 
     pub const fn new(x: f64, y: f64, z: f64) -> Point {
-        Point(x, y, z)
+        Self::wrap_vector(Vector(x, y, z))
+    }
+
+    const fn wrap_vector(pv: Vector) -> Point {
+        Point { v: pv }
     }
 }
 
@@ -87,6 +94,12 @@ impl UnitVector {
     }
 }
 
+impl Point {
+    pub fn as_vector(&self) -> &Vector {
+        &self.v
+    }
+}
+
 impl PartialEq for Vector {
     fn eq(&self, other: &Self) -> bool {
         self.is_approx_equal(other, EQUALITY_TOLERANCE)
@@ -105,13 +118,13 @@ mod tests {
 
     #[test]
     fn add_vector_and_point() {
-        let left = Point(3., -2., 5.);
+        let left = Point::new(3., -2., 5.);
         let right = Vector(-2., 3., 1.);
 
         let sum_left = &left + &right;
         let sum_right = &right + &left;
 
-        assert_eq!(sum_left, Point(1., 1., 6.));
+        assert_eq!(sum_left, Point::new(1., 1., 6.));
         assert_eq!(sum_left, sum_right);
     }
 
@@ -137,8 +150,8 @@ mod tests {
 
     #[test]
     fn subtract_point_from_point_makes_a_vector() {
-        let dest = Point(3., 2., 1.);
-        let src = Point(5., 6., 7.);
+        let dest = Point::new(3., 2., 1.);
+        let src = Point::new(5., 6., 7.);
 
         let result = dest - src;
         assert_eq!(result, Vector(-2., -4., -6.))
@@ -146,11 +159,11 @@ mod tests {
 
     #[test]
     fn subtract_vector_from_point() {
-        let left = Point(3., 2., 1.);
+        let left = Point::new(3., 2., 1.);
         let right = Vector(5., 6., 7.);
 
         let result = left - right;
-        assert_eq!(result, Point(-2., -4., -6.));
+        assert_eq!(result, Point::new(-2., -4., -6.));
     }
 
     #[test]

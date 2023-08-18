@@ -59,26 +59,26 @@ mod tests {
 
         #[test]
         fn normal_towards_x_axis() {
-            let n = SPHERE.normal_at(&Point(1., 0., 0.));
+            let n = SPHERE.normal_at(&Point::new(1., 0., 0.));
             assert_eq!(n, Normal::new(1., 0., 0.));
         }
 
         #[test]
         fn normal_towards_y_axis() {
-            let n = SPHERE.normal_at(&Point(0., 1., 0.));
+            let n = SPHERE.normal_at(&Point::new(0., 1., 0.));
             assert_eq!(n, Normal::new(0., 1., 0.));
         }
 
         #[test]
         fn normal_towards_z_axis() {
-            let n = SPHERE.normal_at(&Point(0., 0., 1.));
+            let n = SPHERE.normal_at(&Point::new(0., 0., 1.));
             assert_eq!(n, Normal::new(0., 0., 1.));
         }
 
         #[test]
         fn normal_at_non_axial_point() {
             let sqrt_3 = (3.0 as f64).sqrt();
-            let n = SPHERE.normal_at(&Point(sqrt_3 / 3., sqrt_3 / 3., sqrt_3 / 3.));
+            let n = SPHERE.normal_at(&Point::new(sqrt_3 / 3., sqrt_3 / 3., sqrt_3 / 3.));
             assert_eq!(n, Normal::new(sqrt_3 / 3., sqrt_3 / 3., sqrt_3 / 3.))
         }
     }
@@ -92,31 +92,31 @@ mod tests {
 
         #[test]
         fn ray_misses_sphere() {
-            let xs = intersections_with_ray_from_origin(Point(0., 2., -5.));
+            let xs = intersections_with_ray_from_origin(Point::new(0., 2., -5.));
             assert_eq!(xs, vec![]);
         }
 
         #[test]
         fn intersects_at_two_points() {
-            let xs = intersections_with_ray_from_origin(Point(0., 0., -5.));
+            let xs = intersections_with_ray_from_origin(Point::new(0., 0., -5.));
             assert_eq!(xs, vec![4.0, 6.0]);
         }
 
         #[test]
         fn intersects_at_tangent() {
-            let xs = intersections_with_ray_from_origin(Point(0., 1., -5.));
+            let xs = intersections_with_ray_from_origin(Point::new(0., 1., -5.));
             assert_eq!(xs, vec![5.0, 5.0]);
         }
 
         #[test]
         fn ray_originates_inside_sphere() {
-            let xs = intersections_with_ray_from_origin(Point(0., 0., 0.));
+            let xs = intersections_with_ray_from_origin(Point::new(0., 0., 0.));
             assert_eq!(xs, vec![-1., 1.]);
         }
 
         #[test]
         fn sphere_is_behind_ray() {
-            let xs = intersections_with_ray_from_origin(Point(0., 0., 5.));
+            let xs = intersections_with_ray_from_origin(Point::new(0., 0., 5.));
             assert_eq!(xs, vec![-6., -4.]);
         }
 

@@ -40,18 +40,18 @@ mod tests {
 
     #[test]
     fn compute_point_from_distance() {
-        let origin = Point(2., 3., 4.);
+        let origin = Point::new(2., 3., 4.);
         let ray = Ray::new(&origin, Vector(1., 0., 0.).normalize());
 
-        assert_eq!(Point(2., 3., 4.), ray.position(0.));
-        assert_eq!(Point(3., 3., 4.), ray.position(1.));
-        assert_eq!(Point(1., 3., 4.), ray.position(-1.));
-        assert_eq!(Point(4.5, 3., 4.), ray.position(2.5));
+        assert_eq!(Point::new(2., 3., 4.), ray.position(0.));
+        assert_eq!(Point::new(3., 3., 4.), ray.position(1.));
+        assert_eq!(Point::new(1., 3., 4.), ray.position(-1.));
+        assert_eq!(Point::new(4.5, 3., 4.), ray.position(2.5));
     }
 
     #[test]
     fn compute_vector_projection() {
-        let origin = Point(2., 3., 4.);
+        let origin = Point::new(2., 3., 4.);
         let ray = Ray::new(&origin, Vector(1., 0., 0.).normalize());
 
         assert_eq!(

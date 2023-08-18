@@ -22,10 +22,11 @@ impl Transform {
     }
 
     fn apply(&self, pt: &Point) -> Point {
-        Point(
-            pt.0 * self.el(0, 0) + pt.1 * self.el(0, 1) + pt.2 * self.el(0, 2),
-            pt.0 * self.el(1, 0) + pt.1 * self.el(1, 1) + pt.2 * self.el(1, 2),
-            pt.0 * self.el(2, 0) + pt.1 * self.el(2, 1) + pt.2 * self.el(2, 2),
+        let v = pt.as_vector();
+        Point::new(
+            v.0 * self.el(0, 0) + v.1 * self.el(0, 1) + v.2 * self.el(0, 2),
+            v.0 * self.el(1, 0) + v.1 * self.el(1, 1) + v.2 * self.el(1, 2),
+            v.0 * self.el(2, 0) + v.1 * self.el(2, 1) + v.2 * self.el(2, 2),
         )
     }
 
@@ -44,12 +45,12 @@ mod tests {
 
     #[test]
     fn rotate_around_z_axis() {
-        let pt = Point(0., 1., 0.);
+        let pt = Point::new(0., 1., 0.);
         let half_quarter = Transform::rotate_z(PI / 4.);
         let full_quarter = Transform::rotate_z(PI / 2.);
 
-        assert_points_eq(half_quarter * &pt, Point(-SQRT_2 / 2., SQRT_2 / 2., 0.));
-        assert_points_eq(full_quarter * &pt, Point(-1., 0., 0.));
+        assert_points_eq(half_quarter * &pt, Point::new(-SQRT_2 / 2., SQRT_2 / 2., 0.));
+        assert_points_eq(full_quarter * &pt, Point::new(-1., 0., 0.));
     }
 
     fn assert_points_eq(p1: Point, p2: Point) {
