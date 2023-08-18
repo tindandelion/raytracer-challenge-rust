@@ -4,7 +4,6 @@ use drawing::Canvas;
 use drawing::Color;
 use geometry::Point;
 use geometry::UnitVector;
-use geometry::Vector;
 
 use ppm::write_ppm;
 use raycaster::Camera;
