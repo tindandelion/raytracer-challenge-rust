@@ -12,14 +12,11 @@ impl<'a> Ray<'a> {
     }
 
     pub fn new(origin: &'a Point, direction: UnitVector) -> Ray<'a> {
-        if !direction.is_unit() {
-            panic!("Only allow unit length vectors as ray direction")
-        }
         Ray { origin, direction }
     }
 
     pub fn position(&self, distance: f64) -> Point {
-        self.origin + &self.direction * distance
+        self.origin + self.direction.v() * distance
     }
 
     pub fn scalar_projection_of(&self, v: &Vector) -> f64 {
@@ -38,13 +35,13 @@ mod tests {
         let origin = Point::ZERO;
         let destination = Point::new(1., 1., 0.);
         let ray = Ray::between(&origin, &destination);
-        assert_eq!(ray.direction, Vector(SQRT_2 / 2., SQRT_2 / 2., 0.))
+        assert_eq!(ray.direction.v(), &Vector(SQRT_2 / 2., SQRT_2 / 2., 0.))
     }
 
     #[test]
     fn compute_point_from_distance() {
         let origin = Point(2., 3., 4.);
-        let ray = Ray::new(&origin, Vector(1., 0., 0.));
+        let ray = Ray::new(&origin, Vector(1., 0., 0.).normalize());
 
         assert_eq!(Point(2., 3., 4.), ray.position(0.));
         assert_eq!(Point(3., 3., 4.), ray.position(1.));
@@ -55,7 +52,7 @@ mod tests {
     #[test]
     fn compute_vector_projection() {
         let origin = Point(2., 3., 4.);
-        let ray = Ray::new(&origin, Vector(1., 0., 0.));
+        let ray = Ray::new(&origin, Vector(1., 0., 0.).normalize());
 
         assert_eq!(
             ray.scalar_projection_of(&Vector(1., 1., 0.)),

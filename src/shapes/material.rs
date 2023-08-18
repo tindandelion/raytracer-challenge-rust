@@ -39,7 +39,7 @@ impl Material {
     }
 
     fn diffuse(&self, light_direction: &UnitVector, normal: &Normal) -> f64 {
-        let light_dot_normal = normal.dot(light_direction);
+        let light_dot_normal = normal.dot(light_direction.v());
         if light_dot_normal < 0. {
             return 0.;
         }
@@ -52,8 +52,8 @@ impl Material {
         eye_direction: &UnitVector,
         normal: &Normal,
     ) -> f64 {
-        let reflection = normal.reflect(light_direction);
-        let reflect_dot_eye = (eye_direction).dot(&reflection);
+        let reflection = normal.reflect(light_direction.v());
+        let reflect_dot_eye = eye_direction.dot(&reflection);
         if (reflect_dot_eye) <= 0. {
             return 0.;
         }
@@ -78,7 +78,7 @@ mod tests {
         #[test]
         fn light_strictly_behind_observer() {
             let light = PointLight::new(Color::WHITE, Point::new(0., 0., -10.));
-            let eye_d = Vector(0., 0., -1.);
+            let eye_d = Vector(0., 0., -1.).normalize();
             let normal = Normal::new(0., 0., -1.);
 
             let result = MATERIAL.lighting(&light, &POSITION, &eye_d, &normal);
@@ -98,7 +98,7 @@ mod tests {
         #[test]
         fn observer_opposite_surface_with_light_offset() {
             let light = PointLight::new(Color::WHITE, Point::new(0., 10., -10.));
-            let eye_d = Vector(0., 0., -1.);
+            let eye_d = Vector(0., 0., -1.).normalize();
             let normal = Normal::new(0., 0., -1.);
 
             let result = MATERIAL.lighting(&light, &POSITION, &eye_d, &normal);
@@ -118,7 +118,7 @@ mod tests {
         #[test]
         fn light_behind_surface() {
             let light = PointLight::new(Color::WHITE, Point::new(0., 0., 10.));
-            let eye_d = Vector(0., 0., -1.);
+            let eye_d = Vector(0., 0., -1.).normalize();
             let normal = Normal::new(0., 0., -1.);
 
             let result = MATERIAL.lighting(&light, &POSITION, &eye_d, &normal);

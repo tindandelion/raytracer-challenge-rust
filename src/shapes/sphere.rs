@@ -121,7 +121,7 @@ mod tests {
         }
 
         fn intersections_with_ray_from_origin(origin: Point) -> Vec<f64> {
-            let z_axis = Vector(0., 0., 1.);
+            let z_axis = Vector(0., 0., 1.).normalize();
             let ray = Ray::new(&origin, z_axis);
             SPHERE.intersect_with(&ray)
         }

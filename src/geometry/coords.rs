@@ -1,11 +1,15 @@
 use overload::overload;
-use std::ops;
+use std::ops::{self, Deref};
 
 #[derive(Debug)]
 pub struct Vector(pub f64, pub f64, pub f64);
 #[derive(Debug)]
 pub struct Point(pub f64, pub f64, pub f64);
-pub type UnitVector = Vector;
+
+#[derive(Debug, PartialEq)]
+pub struct UnitVector {
+    v: Vector,
+}
 
 overload!(- (a: ?Vector) -> Vector { Vector(-a.0, -a.1, -a.2) });
 
@@ -45,7 +49,7 @@ impl Vector {
     }
 
     pub fn normalize(&self) -> UnitVector {
-        self * (1. / self.magnitude())
+        UnitVector::new(self * (1. / self.magnitude()))
     }
 
     pub fn dot(&self, v: &Vector) -> f64 {
@@ -62,6 +66,24 @@ impl Vector {
 
     pub fn is_approx_equal(&self, other: &Vector, tolerance: f64) -> bool {
         (self - other).magnitude() <= tolerance
+    }
+}
+
+impl UnitVector {
+    fn new(v: Vector) -> UnitVector {
+        UnitVector { v }
+    }
+
+    pub fn v(&self) -> &Vector {
+        &self.v
+    }
+
+    pub fn dot(&self, other: &Vector) -> f64 {
+        self.v.dot(other)
+    }
+
+    pub fn flip(&self) -> UnitVector {
+        UnitVector { v: -&self.v }
     }
 }
 
@@ -156,10 +178,10 @@ mod tests {
 
     #[test]
     fn normalize_vector() {
-        assert_eq!(Vector(4., 0., 0.).normalize(), Vector(1., 0., 0.));
+        assert_eq!(Vector(4., 0., 0.).normalize().v(), &Vector(1., 0., 0.));
         assert_eq!(
-            Vector(1., 2., 2.).normalize(),
-            Vector(1. / 3., 2. / 3., 2. / 3.)
+            Vector(1., 2., 2.).normalize().v(),
+            &Vector(1. / 3., 2. / 3., 2. / 3.)
         );
     }
 
@@ -168,7 +190,7 @@ mod tests {
         assert!(!Vector(4., 0., 0.).is_unit(), "Non-unit vector");
         assert!(Vector(1., 0., 0.).is_unit(), "Unit vector by default");
         assert!(
-            Vector(1., 1., 0.).normalize().is_unit(),
+            Vector(1., 1., 0.).normalize().v().is_unit(),
             "Vector after normalization"
         );
     }

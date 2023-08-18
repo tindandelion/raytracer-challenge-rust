@@ -1,8 +1,8 @@
-use super::Vector;
+use super::{UnitVector, Vector};
 
 #[derive(PartialEq, Debug)]
 pub struct Normal {
-    direction: Vector,
+    direction: UnitVector,
 }
 
 impl Normal {
@@ -17,7 +17,7 @@ impl Normal {
     }
 
     pub fn reflect(&self, incoming: &Vector) -> Vector {
-        -incoming + &self.direction * 2. * incoming.dot(&self.direction)
+        -incoming + self.direction.v() * 2. * incoming.dot(self.direction.v())
     }
 }
 
@@ -38,7 +38,7 @@ mod tests {
         let v = Vector(1., 1., 0.);
         let n = Normal::from(&v);
 
-        assert_eq!(n.direction, Vector(SQRT_2 / 2., SQRT_2 / 2., 0.));
+        assert_eq!(n.direction.v(), &Vector(SQRT_2 / 2., SQRT_2 / 2., 0.));
     }
 
     #[test]

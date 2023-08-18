@@ -3,6 +3,7 @@ use std::f64::consts::PI;
 use drawing::Canvas;
 use drawing::Color;
 use geometry::Point;
+use geometry::UnitVector;
 use geometry::Vector;
 
 use ppm::write_ppm;
@@ -37,11 +38,11 @@ fn hit_point(r: &Ray, shape: &Sphere) -> Option<Point> {
     }
 }
 
-fn get_color_at(pt: &Point, shape: &Sphere, ray_direction: &Vector) -> Color {
+fn get_color_at(pt: &Point, shape: &Sphere, ray_direction: &UnitVector) -> Color {
     let color = Color::new(1., 0.2, 1.);
     let light = PointLight::new(Color::WHITE, Point::new(-10., 10., 10.));
     let normal = shape.normal_at(pt);
-    Material::default_with_color(color).lighting(&light, &pt, &(-ray_direction), &normal)
+    Material::default_with_color(color).lighting(&light, &pt, &(ray_direction.flip()), &normal)
 }
 
 fn main() {

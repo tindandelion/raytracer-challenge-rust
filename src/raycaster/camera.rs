@@ -64,14 +64,16 @@ mod tests {
     #[test]
     fn direction_to_the_canvas_center() {
         let c = Camera::new(201, 101, PI / 2.);
-        c.cast_ray_at(100, 50, |r| assert_eq!(r.direction, Vector(0., 0., -1.)));
+        c.cast_ray_at(100, 50, |r| {
+            assert_eq!(r.direction.v(), &Vector(0., 0., -1.))
+        });
     }
 
     #[test]
     fn direction_to_canvas_corner() {
         let c = Camera::new(201, 101, PI / 2.);
         c.cast_ray_at(0, 0, |r| {
-            assert_eq!(r.direction, Vector(-0.665186, 0.332593, -0.668512))
+            assert_eq!(r.direction.v(), &Vector(-0.665186, 0.332593, -0.668512))
         });
     }
 
