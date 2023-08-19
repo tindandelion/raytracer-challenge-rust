@@ -77,6 +77,16 @@ impl Vector {
 }
 
 impl UnitVector {
+    pub const X: UnitVector = UnitVector {
+        v: Vector(1., 0., 0.),
+    };
+    pub const Y: UnitVector = UnitVector {
+        v: Vector(0., 1., 0.),
+    };
+    pub const Z: UnitVector = UnitVector {
+        v: Vector(0., 0., 1.),
+    };
+
     fn new(v: Vector) -> UnitVector {
         UnitVector { v }
     }
