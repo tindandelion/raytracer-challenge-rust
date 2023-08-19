@@ -1,7 +1,7 @@
 use overload::overload;
 use std::ops::{self};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Vector(pub f64, pub f64, pub f64);
 
 #[derive(Debug, PartialEq)]
@@ -9,7 +9,7 @@ pub struct UnitVector {
     v: Vector,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Point {
     v: Vector,
 }
