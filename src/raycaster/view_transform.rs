@@ -2,7 +2,7 @@ use crate::geometry::{Point, UnitVector, Vector};
 
 struct OrthogonalMatrix([f64; 16]);
 
-struct ViewTransform {
+pub struct ViewTransform {
     view_basis: OrthogonalMatrix,
 }
 
@@ -11,9 +11,12 @@ impl OrthogonalMatrix {
         let x_v = x.v();
         let y_v = y.v();
         let z_v = z.v();
+        #[rustfmt::skip]
         let matrix = [
-            x_v.0, y_v.0, z_v.0, 0., x_v.1, y_v.1, z_v.1, 0., x_v.2, y_v.2, z_v.2, 0., 0., 0., 0.,
-            1.,
+            x_v.0, y_v.0, z_v.0, 0., 
+            x_v.1, y_v.1, z_v.1, 0., 
+            x_v.2, y_v.2, z_v.2, 0., 
+            0.,    0.,    0.,    1.,
         ];
         OrthogonalMatrix(matrix)
     }
@@ -32,24 +35,14 @@ impl OrthogonalMatrix {
     }
 
     fn transpose(&self) -> OrthogonalMatrix {
-        OrthogonalMatrix([
-            self.el(0, 0),
-            self.el(1, 0),
-            self.el(2, 0),
-            self.el(3, 0),
-            self.el(0, 1),
-            self.el(1, 1),
-            self.el(2, 1),
-            self.el(3, 1),
-            self.el(0, 2),
-            self.el(1, 2),
-            self.el(2, 2),
-            self.el(3, 2),
-            self.el(0, 3),
-            self.el(1, 3),
-            self.el(2, 3),
-            self.el(3, 3),
-        ])
+        #[rustfmt::skip]
+        let transposed = [
+            self.el(0, 0), self.el(1, 0), self.el(2, 0), self.el(3, 0),
+            self.el(0, 1), self.el(1, 1), self.el(2, 1), self.el(3, 1),
+            self.el(0, 2), self.el(1, 2), self.el(2, 2), self.el(3, 2),
+            self.el(0, 3), self.el(1, 3), self.el(2, 3), self.el(3, 3),
+        ];
+        OrthogonalMatrix(transposed)
     }
 
     fn el(&self, row: usize, col: usize) -> f64 {
