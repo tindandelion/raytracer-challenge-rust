@@ -51,16 +51,6 @@ impl OrthogonalMatrix {
 }
 
 impl ViewTransform {
-    pub fn identity() -> ViewTransform {
-        ViewTransform {
-            view_basis: OrthogonalMatrix::from_vectors(
-                &UnitVector::X,
-                &UnitVector::Y,
-                &UnitVector::Z,
-            ),
-        }
-    }
-
     pub fn to(view_direction: &Point) -> ViewTransform {
         let origin = Point::ZERO;
         let view_y = Vector(0., 1., 0.).normalize();
@@ -89,15 +79,23 @@ mod tests {
     use super::ViewTransform;
 
     #[test]
-    fn identity_transform() {
-        let world_point = Point::new(1., 2., 3.);
-        let transform = ViewTransform::identity();
+    fn look_in_positive_z_direction() {
+        let view_direction = Point::new(0., 0., 1.);
+        let transform = ViewTransform::to(&view_direction);
 
-        let view_point = transform.to_view(&world_point);
-        let restored_world_point = transform.to_world(&view_point);
+        let view_point = Point::new(1., 0., 1.);
+        let world_point = transform.to_world(&view_point);
+        assert_eq!(world_point, view_point);
+    }
 
-        assert_eq!(view_point, world_point);
-        assert_eq!(restored_world_point, world_point);
+    #[test]
+    fn look_in_negative_z_direction() {
+        let view_direction = Point::new(0., 0., -1.);
+        let transform = ViewTransform::to(&view_direction);
+
+        let view_point = Point::new(1., 0., 1.);
+        let world_point = transform.to_world(&view_point);
+        assert_eq!(world_point, Point::new(-1., 0., -1.));
     }
 
     #[test]

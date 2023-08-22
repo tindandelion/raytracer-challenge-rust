@@ -9,6 +9,7 @@ use ppm::write_ppm;
 use raycaster::Camera;
 use raycaster::PointLight;
 use raycaster::Ray;
+use raycaster::ViewTransform;
 use shapes::Material;
 use shapes::Sphere;
 
@@ -19,7 +20,8 @@ mod raycaster;
 mod shapes;
 
 fn scan(canvas_size: usize, mut f: impl FnMut(&Ray, usize, usize) -> ()) {
-    let camera = Camera::new(canvas_size, canvas_size, PI / 2.);
+    let mut camera = Camera::new(canvas_size, canvas_size, PI / 2.);
+    camera.set_transform(ViewTransform::to(&Point::new(0., 0., 1.)));
     for y in 0..canvas_size {
         for x in 0..canvas_size {
             camera.cast_ray_at(x, y, |r| f(&r, x, y));
@@ -39,13 +41,13 @@ fn hit_point(r: &Ray, shape: &Sphere) -> Option<Point> {
 
 fn get_color_at(pt: &Point, shape: &Sphere, ray_direction: &UnitVector) -> Color {
     let color = Color::new(1., 0.2, 1.);
-    let light = PointLight::new(Color::WHITE, Point::new(-10., 10., 10.));
+    let light = PointLight::new(Color::WHITE, Point::new(10., 10., -10.));
     let normal = shape.normal_at(pt);
     Material::default_with_color(color).lighting(&light, &pt, &(ray_direction.flip()), &normal)
 }
 
 fn main() {
-    let sphere = Sphere::new(Point::new(0., 0., -0.5), 0.25);
+    let sphere = Sphere::new(Point::new(0., 0., 0.5), 0.25);
     let mut canvas = Canvas::square(512);
 
     scan(canvas.width(), |ray, px, py| {

@@ -1,11 +1,12 @@
 use crate::geometry::Point;
 
-use super::Ray;
+use super::{view_transform::ViewTransform, Ray};
 
 pub struct Camera {
     half_view: f64,
     aspect_ratio: f64,
     pixel_size: f64,
+    transform: ViewTransform,
 }
 
 impl Camera {
@@ -19,25 +20,32 @@ impl Camera {
         } else {
             2. * half_view / (v_size as f64)
         };
+        let transform = ViewTransform::to(&Point::new(0., 0., -1.));
 
         Camera {
             half_view,
             pixel_size,
             aspect_ratio,
+            transform,
         }
     }
 
-    pub fn cast_ray_at(&self, px: usize, py: usize, mut f: impl FnMut(&Ray) -> ()) {
-        let ray = Ray::between(&Self::CAMERA_POSITION, &self.world_pixel_at(px, py));
-        f(&ray)
+    pub fn set_transform(&mut self, transform: ViewTransform) {
+        self.transform = transform;
     }
 
-    fn world_pixel_at(&self, px: usize, py: usize) -> Point {
+    pub fn cast_ray_at(&self, px: usize, py: usize, mut f: impl FnMut(&Ray) -> ()) {
+        let origin = self.transform.to_world(&Self::CAMERA_POSITION);
+        let pixel = self.transform.to_world(&self.view_pixel_at(px, py));
+        f(&Ray::between(&origin, &pixel))
+    }
+
+    fn view_pixel_at(&self, px: usize, py: usize) -> Point {
         let x_offset = (px as f64 + 0.5) * self.pixel_size;
         let y_offset = (py as f64 + 0.5) * self.pixel_size;
         let world_x = -self.half_view + x_offset;
         let world_y = self.half_view * self.aspect_ratio - y_offset;
-        Point::new(world_x, world_y, -1.)
+        Point::new(world_x, world_y, 1.)
     }
 }
 
@@ -45,7 +53,10 @@ impl Camera {
 mod tests {
     use std::f64::consts::PI;
 
-    use crate::geometry::Vector;
+    use crate::{
+        geometry::{Point, Vector},
+        raycaster::view_transform::ViewTransform,
+    };
 
     use super::Camera;
 
@@ -73,7 +84,16 @@ mod tests {
     fn direction_to_canvas_corner() {
         let c = Camera::new(201, 101, PI / 2.);
         c.cast_ray_at(0, 0, |r| {
-            assert_eq!(r.direction.v(), &Vector(-0.665186, 0.332593, -0.668512))
+            assert_eq!(r.direction.v(), &Vector(0.665186, 0.332593, -0.668512))
+        });
+    }
+
+    #[test]
+    fn direction_to_canvas_corner_with_positive_z_direction() {
+        let mut c = Camera::new(201, 101, PI / 2.);
+        c.set_transform(ViewTransform::to(&Point::new(0., 0., 1.)));
+        c.cast_ray_at(0, 0, |r| {
+            assert_eq!(r.direction.v(), &Vector(-0.665186, 0.332593, 0.668512))
         });
     }
 
