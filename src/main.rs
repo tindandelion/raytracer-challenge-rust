@@ -5,6 +5,7 @@ use drawing::Color;
 use geometry::Point;
 use geometry::UnitVector;
 
+use geometry::Vector;
 use ppm::write_ppm;
 use raycaster::Camera;
 use raycaster::PointLight;
@@ -21,7 +22,10 @@ mod shapes;
 
 fn scan(canvas_size: usize, mut f: impl FnMut(&Ray, usize, usize) -> ()) {
     let mut camera = Camera::new(canvas_size, canvas_size, PI / 2.);
-    camera.set_transform(ViewTransform::to(&Point::new(0., 0., 1.)));
+    let camera_dir = Point::new(0., 0., 1.);
+    let camera_up = Vector(0., 1., 0.);
+
+    camera.set_transform(ViewTransform::to_up(&camera_dir, &camera_up));
     for y in 0..canvas_size {
         for x in 0..canvas_size {
             camera.cast_ray_at(x, y, |r| f(&r, x, y));

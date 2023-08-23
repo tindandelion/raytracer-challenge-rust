@@ -52,17 +52,20 @@ impl OrthogonalMatrix {
 
 impl ViewTransform {
     pub fn to(view_direction: &Point) -> ViewTransform {
-        let origin = Point::ZERO;
-        let view_y = Vector(0., 1., 0.).normalize();
-        let view_z = (view_direction - origin).normalize();
-        let view_x = view_y.v().cross(view_z.v()).normalize();
+        Self::to_up(view_direction, &Vector(0., 1., 0.))
+    }
+
+    pub fn to_up(to: &Point, up: &Vector) -> ViewTransform {
+        let from = Point::ZERO;
+        let view_z = (to - from).normalize();
+
+        let up_norm = up.normalize();
+        let view_x = up_norm.v().cross(view_z.v()).normalize();
+        let view_y = view_z.v().cross(view_x.v()).normalize();
+        
 
         let view_basis = OrthogonalMatrix::from_vectors(&view_x, &view_y, &view_z);
         ViewTransform { view_basis }
-    }
-
-    pub fn to_view(&self, world_point: &Point) -> Point {
-        self.view_basis.inverse().mul(world_point)
     }
 
     pub fn to_world(&self, view_point: &Point) -> Point {
@@ -74,9 +77,19 @@ impl ViewTransform {
 mod tests {
     use std::f64::consts::SQRT_2;
 
-    use crate::geometry::Point;
+    use crate::geometry::{Point, Vector};
 
     use super::ViewTransform;
+
+    #[test]
+    fn explore_cross_product() {
+        let x = Vector(1., 0., 0.);
+        let y = Vector(0., 1., 0.);
+        let z = Vector(0., 0., 1.);
+
+        assert_eq!(x, y.cross(&z));
+        assert_eq!(y, z.cross(&x));
+    }
 
     #[test]
     fn look_in_positive_z_direction() {
@@ -102,12 +115,21 @@ mod tests {
     fn choose_view_direction_in_xz_plane() {
         let view_direction = Point::new(1., 0., -1.);
         let transform = ViewTransform::to(&view_direction);
+        
+        let view_point = Point::new(0., 0., SQRT_2);
+        let world_point = transform.to_world(&view_point);
+        assert_eq!(world_point, view_direction);
+    }
 
-        let world_point = view_direction.clone();
-        let view_point = transform.to_view(&world_point);
-        let restored_world_point = transform.to_world(&view_point);
+    #[test]
+    fn specify_custom_up_direction() {
+        let view_direction = Point::new(0., 0., 1.);
+        let up = Vector(1., 1., 1.);
+        let transform = ViewTransform::to_up(&view_direction, &up);
+        
 
-        assert_eq!(view_point, Point::new(0., 0., SQRT_2));
-        assert_eq!(restored_world_point, world_point);
+        let view_point = Point::new(1., 1., 5.);
+        let world_point = transform.to_world(&view_point);
+        assert_eq!(world_point, Point::new(SQRT_2, 0., 5.))
     }
 }
