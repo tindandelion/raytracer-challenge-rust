@@ -22,10 +22,11 @@ mod shapes;
 
 fn scan(canvas_size: usize, mut f: impl FnMut(&Ray, usize, usize) -> ()) {
     let mut camera = Camera::new(canvas_size, canvas_size, PI / 2.);
+    let camera_pos = Point::new(0., 0., -1.75);
     let camera_dir = Point::new(0., 0., 1.);
     let camera_up = Vector(0., 1., 0.);
 
-    camera.set_transform(ViewTransform::to_up(&camera_dir, &camera_up));
+    camera.set_transform(ViewTransform::new(&camera_pos, &camera_dir, &camera_up));
     for y in 0..canvas_size {
         for x in 0..canvas_size {
             camera.cast_ray_at(x, y, |r| f(&r, x, y));
@@ -51,7 +52,7 @@ fn get_color_at(pt: &Point, shape: &Sphere, ray_direction: &UnitVector) -> Color
 }
 
 fn main() {
-    let sphere = Sphere::new(Point::new(0., 0., 0.5), 0.25);
+    let sphere = Sphere::unit();
     let mut canvas = Canvas::square(512);
 
     scan(canvas.width(), |ray, px, py| {

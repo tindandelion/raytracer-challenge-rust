@@ -7,7 +7,6 @@ pub struct ViewTransform {
 impl ViewTransform {
     pub fn new(from: &Point, to: &Point, up: &Vector) -> ViewTransform {
         let view_z = (to - from).normalize();
-
         let up_norm = up.normalize();
         let view_x = up_norm.v().cross(view_z.v()).normalize();
         let view_y = view_z.v().cross(view_x.v()).normalize();
@@ -19,10 +18,6 @@ impl ViewTransform {
 
     pub fn to(to: &Point) -> ViewTransform {
         Self::new(&Point::ZERO, to, &Vector(0., 1., 0.))
-    }
-
-    pub fn to_up(to: &Point, up: &Vector) -> ViewTransform {
-        Self::new(&Point::ZERO, to, up)
     }
 
     pub fn to_world(&self, view_point: &Point) -> Point {
@@ -42,7 +37,7 @@ mod tests {
     fn choose_view_direction_in_xz_plane() {
         let view_up = UnitVector::Y.v();
         let look_at = Point::new(1., 0., -1.);
-        let transform = ViewTransform::to_up(&look_at, &view_up);
+        let transform = ViewTransform::new(&Point::ZERO, &look_at, &view_up);
 
         let view_point = Point::new(0., 0., SQRT_2);
         let world_point = transform.to_world(&view_point);
@@ -53,7 +48,7 @@ mod tests {
     fn specify_custom_up_direction() {
         let look_at = Point::new(0., 0., 1.);
         let up = Vector(1., 1., 1.);
-        let transform = ViewTransform::to_up(&look_at, &up);
+        let transform = ViewTransform::new(&Point::ZERO, &look_at, &up);
 
         let view_point = Point::new(1., 1., 5.);
         let world_point = transform.to_world(&view_point);
