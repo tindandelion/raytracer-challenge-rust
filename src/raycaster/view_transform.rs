@@ -13,9 +13,7 @@ impl ViewTransform {
         let view_y = view_z.v().cross(view_x.v()).normalize();
 
         let orientation = Matrix::from_vectors(&view_x, &view_y, &view_z);
-        // let view_basis = orientation * Matrix::translation(&(-from.as_vector()));
-        let view_basis = orientation;
-
+        let view_basis = Matrix::translation(from.as_vector()) * orientation;
         ViewTransform { view_basis }
     }
 
@@ -28,7 +26,7 @@ impl ViewTransform {
     }
 
     pub fn to_world(&self, view_point: &Point) -> Point {
-        self.view_basis.mul_point(view_point)
+        &self.view_basis * view_point
     }
 }
 
@@ -63,7 +61,6 @@ mod tests {
     }
 
     #[test]
-    #[ignore]
     fn specify_custom_from_point() {
         let view_up = UnitVector::Y.v();
         let look_at = Point::ZERO;
