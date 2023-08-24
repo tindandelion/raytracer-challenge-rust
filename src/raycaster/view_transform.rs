@@ -1,8 +1,6 @@
 use crate::geometry::{Matrix, Point, Vector};
 
-pub struct ViewTransform {
-    view_basis: Matrix,
-}
+pub struct ViewTransform(Matrix);
 
 impl ViewTransform {
     pub fn new(from: &Point, to: &Point, up: &Vector) -> ViewTransform {
@@ -12,8 +10,8 @@ impl ViewTransform {
         let view_y = view_z.v().cross(view_x.v()).normalize();
 
         let orientation = Matrix::from_vectors(&view_x, &view_y, &view_z);
-        let view_basis = Matrix::translation(from.as_vector()) * orientation;
-        ViewTransform { view_basis }
+        let transform = Matrix::translation(from.as_vector()) * orientation;
+        ViewTransform(transform)
     }
 
     pub fn to(to: &Point) -> ViewTransform {
@@ -21,7 +19,7 @@ impl ViewTransform {
     }
 
     pub fn to_world(&self, view_point: &Point) -> Point {
-        &self.view_basis * view_point
+        &self.0 * view_point
     }
 }
 
