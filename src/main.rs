@@ -46,8 +46,8 @@ fn main() {
     let light = PointLight::new(Color::WHITE, Point::new(10., 10., -10.));
 
     let mut world = World::new(light);
-    world.add_shape(big_sphere);
     world.add_shape(small_sphere);
+    world.add_shape(big_sphere);
 
     let mut canvas = Canvas::square(512);
     scan(canvas.width(), |ray, px, py| {

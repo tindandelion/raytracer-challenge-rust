@@ -6,13 +6,13 @@ pub struct Ray<'a> {
 }
 
 impl<'a> Ray<'a> {
+    pub const fn new(origin: &'a Point, direction: UnitVector) -> Ray<'a> {
+        Ray { origin, direction }
+    }
+
     pub fn between(origin: &'a Point, dest: &Point) -> Ray<'a> {
         let direction = (dest - origin).normalize();
         Self::new(origin, direction)
-    }
-
-    pub fn new(origin: &'a Point, direction: UnitVector) -> Ray<'a> {
-        Ray { origin, direction }
     }
 
     pub fn position(&self, distance: f64) -> Point {
