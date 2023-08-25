@@ -20,6 +20,11 @@ mod ppm;
 mod raycaster;
 mod shapes;
 
+struct RayHit<'a> {
+    point: Point,
+    shape: &'a Sphere,
+}
+
 fn scan(canvas_size: usize, mut f: impl FnMut(&Ray, usize, usize) -> ()) {
     let mut camera = Camera::new(canvas_size, canvas_size, PI / 2.);
     let camera_pos = Point::new(0., 0., -1.75);
@@ -34,30 +39,41 @@ fn scan(canvas_size: usize, mut f: impl FnMut(&Ray, usize, usize) -> ()) {
     }
 }
 
-fn hit_point(r: &Ray, shape: &Sphere) -> Option<Point> {
+fn hit_point<'a>(r: &Ray, shape: &'a Sphere) -> Option<RayHit<'a>> {
     let intersections = shape.intersect_with(r);
     if intersections.is_empty() {
         return None;
     } else {
-        let first_point = intersections[0];
-        return Some(r.position(first_point));
+        let first_intersection = intersections[0];
+        let hit_point = r.position(first_intersection);
+        let hit = RayHit {
+            point: hit_point,
+            shape,
+        };
+        return Some(hit);
     }
 }
 
 fn get_color_at(pt: &Point, shape: &Sphere, ray_direction: &UnitVector) -> Color {
-    let color = Color::new(1., 0.2, 1.);
     let light = PointLight::new(Color::WHITE, Point::new(10., 10., -10.));
     let normal = shape.normal_at(pt);
-    Material::default_with_color(color).lighting(&light, &pt, &(ray_direction.flip()), &normal)
+    shape
+        .material()
+        .lighting(&light, &pt, &(ray_direction.flip()), &normal)
+}
+
+fn sphere_material() -> Material {
+    let color = Color::new(1., 0.2, 1.);
+    Material::default_with_color(color)
 }
 
 fn main() {
-    let sphere = Sphere::unit();
+    let sphere = Sphere::unit().with_material(sphere_material());
     let mut canvas = Canvas::square(512);
 
     scan(canvas.width(), |ray, px, py| {
-        if let Some(hit_point) = hit_point(&ray, &sphere) {
-            let point_color = get_color_at(&hit_point, &sphere, &ray.direction);
+        if let Some(hit) = hit_point(&ray, &sphere) {
+            let point_color = get_color_at(&hit.point, hit.shape, &ray.direction);
             canvas.write_pixel(px, py, &point_color);
         }
     });

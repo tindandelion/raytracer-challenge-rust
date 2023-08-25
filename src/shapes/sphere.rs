@@ -3,9 +3,12 @@ use crate::{
     raycaster::Ray,
 };
 
+use super::Material;
+
 pub struct Sphere {
     center: Point,
     radius: f64,
+    material: Material,
 }
 
 impl Sphere {
@@ -14,7 +17,20 @@ impl Sphere {
     }
 
     pub const fn new(center: Point, radius: f64) -> Sphere {
-        Sphere { center, radius }
+        Sphere {
+            center,
+            radius,
+            material: Material::default(),
+        }
+    }
+
+    pub fn with_material(mut self, material: Material) -> Sphere {
+        self.material = material;
+        self
+    }
+
+    pub fn material(&self) -> &Material {
+        &self.material
     }
 
     pub fn normal_at(&self, pt: &Point) -> Normal {

@@ -13,6 +13,10 @@ pub struct Material {
 }
 
 impl Material {
+    pub const fn default() -> Material {
+        Self::default_with_color(Color::WHITE)
+    }
+
     pub const fn default_with_color(color: Color) -> Material {
         Material {
             color,
