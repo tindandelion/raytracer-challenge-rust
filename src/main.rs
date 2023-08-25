@@ -2,7 +2,7 @@ use std::f64::consts::PI;
 
 use drawing::Canvas;
 use drawing::Color;
-use geometry::Normal;
+
 use geometry::Point;
 
 use geometry::Vector;
@@ -11,6 +11,7 @@ use raycaster::Camera;
 use raycaster::PointLight;
 use raycaster::Ray;
 use raycaster::ViewTransform;
+use raycaster::World;
 use shapes::Material;
 use shapes::Sphere;
 
@@ -19,49 +20,6 @@ mod geometry;
 mod ppm;
 mod raycaster;
 mod shapes;
-
-struct RayHit<'a> {
-    point: Point,
-    shape: &'a Sphere,
-}
-
-struct World {
-    light: PointLight,
-    shape: Sphere,
-}
-
-impl RayHit<'_> {
-    fn normal(&self) -> Normal {
-        self.shape.normal_at(&self.point)
-    }
-}
-
-impl World {
-    fn hit_with_ray(&self, ray: &Ray) -> Option<RayHit> {
-        let intersections = self.shape.intersect_with(ray);
-        if intersections.is_empty() {
-            return None;
-        } else {
-            let first_intersection = intersections[0];
-            let hit_point = ray.position(first_intersection);
-            let hit = RayHit {
-                point: hit_point,
-                shape: &self.shape,
-            };
-            return Some(hit);
-        }
-    }
-
-    fn get_color(&self, ray: &Ray) -> Option<Color> {
-        self.hit_with_ray(&ray).map(|hit| {
-            let normal = hit.normal();
-            let eye_direction = ray.direction.flip();
-            hit.shape
-                .material()
-                .lighting(&self.light, &hit.point, &eye_direction, &normal)
-        })
-    }
-}
 
 fn scan(canvas_size: usize, mut f: impl FnMut(&Ray, usize, usize) -> ()) {
     let mut camera = Camera::new(canvas_size, canvas_size, PI / 2.);
