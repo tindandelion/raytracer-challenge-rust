@@ -1,6 +1,6 @@
 use crate::{
     drawing::Color,
-    geometry::{Point, UnitVector},
+    geometry::{Normal, Point, UnitVector},
     shapes::Sphere,
 };
 
@@ -13,20 +13,20 @@ pub struct World {
 
 struct RayHit<'a> {
     shape: &'a Sphere,
-    point: Point,
     shape_index: usize,
+    is_inside: bool,
+    point: Point,
+    eye_direction: UnitVector,
+    normal: Normal,
 }
 
-#[derive(Debug, PartialEq)]
 struct Intersection(usize, f64);
 
 impl RayHit<'_> {
-    fn lightning(&self, light: &PointLight, ray_direction: &UnitVector) -> Color {
-        let normal = self.shape.normal_at(&self.point);
-        let eye_direction = ray_direction.flip();
+    fn lightning(&self, light: &PointLight) -> Color {
         self.shape
             .material()
-            .lighting(light, &self.point, &eye_direction, &normal)
+            .lighting(light, &self.point, &self.eye_direction, &self.normal)
     }
 }
 
@@ -45,21 +45,33 @@ impl World {
 
     pub fn get_color(&self, ray: &Ray) -> Option<Color> {
         self.hit_with_ray(&ray)
-            .map(|hit| hit.lightning(&self.light, &ray.direction))
+            .map(|hit| hit.lightning(&self.light))
     }
 
     fn hit_with_ray(&self, ray: &Ray) -> Option<RayHit> {
-        self.intersections_with(ray).first().map(|inter| {
+        self.intersect_with(ray).first().map(|inter| {
             let Intersection(shape_index, position) = *inter;
+            let shape = self.shapes.get(shape_index).unwrap();
+            let point = ray.position(position);
+            let mut normal = shape.normal_at(&point);
+            let eye_direction = ray.direction.flip();
+            let is_inside = normal.dot(eye_direction.v()) < 0.;
+            if is_inside {
+                normal = normal.flip()
+            }
+
             RayHit {
-                point: ray.position(position),
-                shape: self.shapes.get(shape_index).unwrap(),
+                shape,
                 shape_index,
+                point,
+                normal,
+                eye_direction,
+                is_inside,
             }
         })
     }
 
-    fn intersections_with(&self, ray: &Ray<'_>) -> Vec<Intersection> {
+    fn intersect_with(&self, ray: &Ray<'_>) -> Vec<Intersection> {
         let mut intersections: Vec<Intersection> = self
             .shapes
             .iter()
@@ -70,6 +82,7 @@ impl World {
                     .into_iter()
                     .map(move |v| Intersection(i, v))
             })
+            .filter(|inter| inter.1 >= 0.)
             .collect();
 
         intersections.sort_by(|a, b| a.1.total_cmp(&b.1));
@@ -82,14 +95,14 @@ mod tests {
 
     use crate::{
         drawing::Color,
-        geometry::{Point, UnitVector},
+        geometry::{Normal, Point, UnitVector, Vector},
         raycaster::{PointLight, Ray},
         shapes::Sphere,
     };
 
     use super::World;
 
-    const RAY_ORIGIN: Point = Point::new(0., 0., -100.);
+    const RAY_ORIGIN: Point = Point::new(0., 0., -5.);
     const RAY: Ray = Ray::new(&RAY_ORIGIN, UnitVector::Z);
     const LIGHT: PointLight = PointLight::new(Color::WHITE, Point::ZERO);
 
@@ -102,20 +115,55 @@ mod tests {
     }
 
     #[test]
-    fn cast_ray_at_single_object_world() {
-        let mut world = World::new(LIGHT);
+    fn ignore_intersections_in_negative_directions() {
+        let world = world_with_unit_sphere();
+        let ray_from_inside = Ray::new(&Point::ZERO, UnitVector::Z);
 
-        let shape_index = world.add_shape(Sphere::unit());
+        let intersections = world.intersect_with(&ray_from_inside);
+        let positions: Vec<f64> = intersections.into_iter().map(|i| i.1).collect();
+        assert_eq!(positions, vec![1.0])
+    }
+
+    #[test]
+    fn intersect_world_with_ray() {
+        let mut world = world_with_unit_sphere();
+        world.add_shape(Sphere::new(Point::ZERO, 0.5));
+
+        let intersections = world.intersect_with(&RAY);
+        let positions: Vec<f64> = intersections.into_iter().map(|i| i.1).collect();
+        assert_eq!(positions, vec![4., 4.5, 5.5, 6.])
+    }
+
+    #[test]
+    fn ray_hits_object_from_outside() {
+        let world = world_with_unit_sphere();
         let hit = world.hit_with_ray(&RAY).unwrap();
 
-        assert_eq!(hit.shape_index, shape_index)
+        assert_eq!(hit.shape_index, 0);
+        assert_eq!(hit.is_inside, false);
+        assert_eq!(hit.point, Point::new(0., 0., -1.));
+        assert_eq!(hit.eye_direction, Vector(0., 0., -1.).normalize());
+        assert_eq!(hit.normal, Normal::from(&Vector(0., 0., -1.)));
+    }
+
+    #[test]
+    fn ray_hits_object_from_inside() {
+        let world = world_with_unit_sphere();
+        let ray_from_inside = Ray::new(&Point::ZERO, UnitVector::Z);
+        let hit = world.hit_with_ray(&ray_from_inside).unwrap();
+
+        assert_eq!(hit.shape_index, 0);
+        assert_eq!(hit.is_inside, true);
+        assert_eq!(hit.point, Point::new(0., 0., 1.));
+        assert_eq!(hit.eye_direction, Vector(0., 0., -1.).normalize());
+        assert_eq!(hit.normal, Normal::from(&Vector(0., 0., -1.)))
     }
 
     #[test]
     fn cast_ray_hits_closest_object() {
         let mut world = World::new(LIGHT);
 
-        let front_shape = Sphere::new(Point::new(0., 0., -10.), 0.1);
+        let front_shape = Sphere::new(Point::new(0., 0., -4.), 0.1);
         let back_shape = Sphere::new(Point::new(0., 0., -1.), 0.1);
 
         world.add_shape(back_shape);
@@ -123,5 +171,11 @@ mod tests {
         let hit = world.hit_with_ray(&RAY).unwrap();
 
         assert_eq!(hit.shape_index, front_shape_index);
+    }
+
+    fn world_with_unit_sphere() -> World {
+        let mut world = World::new(LIGHT);
+        world.add_shape(Sphere::new(Point::ZERO, 1.));
+        world
     }
 }

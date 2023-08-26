@@ -19,6 +19,12 @@ impl Normal {
     pub fn reflect(&self, incoming: &Vector) -> Vector {
         -incoming + self.direction.v() * 2. * incoming.dot(self.direction.v())
     }
+
+    pub fn flip(&self) -> Normal {
+        Normal {
+            direction: self.direction.flip(),
+        }
+    }
 }
 
 #[cfg(test)]
