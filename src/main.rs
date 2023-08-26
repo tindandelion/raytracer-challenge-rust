@@ -21,38 +21,52 @@ mod ppm;
 mod raycaster;
 mod shapes;
 
-fn scan(canvas_size: usize, mut f: impl FnMut(&Ray, usize, usize) -> ()) {
-    let mut camera = Camera::new(canvas_size, canvas_size, PI / 3.);
-    let camera_pos = Point::new(0., 0., -3.);
-    let camera_dir = Point::new(0., 0., 1.);
+fn scan(c_width: usize, c_height: usize, mut f: impl FnMut(&Ray, usize, usize) -> ()) {
+    let mut camera = Camera::new(c_width, c_height, PI / 3.);
+    let camera_pos = Point::new(0., 1.5, -5.);
+    let camera_dir = Point::new(0., 1., 0.);
     let camera_up = Vector(0., 1., 0.);
 
     camera.set_transform(ViewTransform::new(&camera_pos, &camera_dir, &camera_up));
-    for y in 0..canvas_size {
-        for x in 0..canvas_size {
+    for y in 0..c_height {
+        for x in 0..c_width {
             camera.cast_ray_at(x, y, |r| f(&r, x, y));
         }
     }
 }
 
-fn material(color: Color) -> Material {
-    Material::default_with_color(color)
+fn sphere_material(color: Color) -> Material {
+    let mut material = Material::default_with_color(color);
+    material.diffuse = 0.7;
+    material.specular = 0.3;
+    material
+}
+
+fn middle_sphere() -> Sphere {
+    Sphere::new(Point::new(-0.5, 1., 0.5), 1.0)
+        .with_material(sphere_material(Color::new(0.1, 1., 0.5)))
+}
+
+fn right_sphere() -> Sphere {
+    Sphere::new(Point::new(1.5, 0.5, -0.5), 0.5)
+        .with_material(sphere_material(Color::new(0.5, 1., 0.1)))
+}
+
+fn left_sphere() -> Sphere {
+    Sphere::new(Point::new(-1.5, 0.33, -0.75), 0.33)
+        .with_material(sphere_material(Color::new(1., 0.8, 0.1)))
 }
 
 fn main() {
-    let big_sphere = Sphere::unit().with_material(material(Color::new(1., 0.2, 1.)));
-    let upper_sphere = Sphere::new(Point::new(0.3, 0.1, -1.5), 0.1)
-        .with_material(material(Color::new(0.3, 0.3, 1.)));
-
-    let light = PointLight::new(Color::WHITE, Point::new(10., 10., -10.));
+    let light = PointLight::new(Color::WHITE, Point::new(-10., 10., -10.));
 
     let mut world = World::new(light);
+    world.add_shape(middle_sphere());
+    world.add_shape(right_sphere());
+    world.add_shape(left_sphere());
 
-    world.add_shape(upper_sphere);
-    world.add_shape(big_sphere);
-
-    let mut canvas = Canvas::square(1024);
-    scan(canvas.width(), |ray, px, py| {
+    let mut canvas = Canvas::new(1024, 512);
+    scan(canvas.width(), canvas.height(), |ray, px, py| {
         let point_color = world.get_color(&ray).unwrap_or(Color::BLACK);
         canvas.write_pixel(px, py, &point_color);
     });

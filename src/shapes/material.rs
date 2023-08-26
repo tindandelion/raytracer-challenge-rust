@@ -7,8 +7,8 @@ use crate::{
 pub struct Material {
     color: Color,
     ambient: f64,
-    diffuse: f64,
-    specular: f64,
+    pub diffuse: f64,
+    pub specular: f64,
     shininess: i32,
 }
 
