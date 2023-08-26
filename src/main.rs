@@ -51,7 +51,7 @@ fn main() {
     world.add_shape(upper_sphere);
     world.add_shape(big_sphere);
 
-    let mut canvas = Canvas::square(512);
+    let mut canvas = Canvas::square(1024);
     scan(canvas.width(), |ray, px, py| {
         let point_color = world.get_color(&ray).unwrap_or(Color::BLACK);
         canvas.write_pixel(px, py, &point_color);
