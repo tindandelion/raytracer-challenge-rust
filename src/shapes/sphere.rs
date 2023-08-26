@@ -12,10 +12,6 @@ pub struct Sphere {
 }
 
 impl Sphere {
-    pub const fn unit() -> Sphere {
-        Self::new(Point::ZERO, 1.0)
-    }
-
     pub const fn new(center: Point, radius: f64) -> Sphere {
         Sphere {
             center,
@@ -63,9 +59,11 @@ fn solve_quadratic_equation(a: f64, b: f64, c: f64) -> Option<(f64, f64)> {
 
 #[cfg(test)]
 mod tests {
+    use crate::geometry::Point;
+
     use super::Sphere;
 
-    static SPHERE: Sphere = Sphere::unit();
+    static SPHERE: Sphere = Sphere::new(Point::ZERO, 1.0);
 
     mod sphere_normals {
         use super::super::Normal;

@@ -7,9 +7,6 @@ pub struct Canvas {
 }
 
 impl Canvas {
-    pub fn square(size: usize) -> Canvas {
-        Self::new(size, size)
-    }
     pub fn new(width: usize, height: usize) -> Canvas {
         let mut pixels: Vec<Color> = Vec::with_capacity(width * height);
         for _ in 0..pixels.capacity() {
@@ -34,16 +31,18 @@ impl Canvas {
         &self.pixels
     }
 
+    pub fn write_pixel(&mut self, x: usize, y: usize, color: &Color) {
+        self.pixels[y * self.width + x] = color.clone();
+    }
+
+    #[cfg(test)]
     pub fn fill(&mut self, color: &Color) {
         for i in 0..self.pixels.len() {
             self.pixels[i] = color.clone();
         }
     }
 
-    pub fn write_pixel(&mut self, x: usize, y: usize, color: &Color) {
-        self.pixels[y * self.width + x] = color.clone();
-    }
-
+    #[cfg(test)]
     fn pixel_at(&self, x: usize, y: usize) -> &Color {
         &self.pixels[y * self.width + x]
     }
