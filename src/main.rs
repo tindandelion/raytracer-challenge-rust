@@ -22,8 +22,8 @@ mod raycaster;
 mod shapes;
 
 fn scan(canvas_size: usize, mut f: impl FnMut(&Ray, usize, usize) -> ()) {
-    let mut camera = Camera::new(canvas_size, canvas_size, PI / 2.);
-    let camera_pos = Point::new(0., 0., -1.75);
+    let mut camera = Camera::new(canvas_size, canvas_size, PI / 3.);
+    let camera_pos = Point::new(0., 0., -3.);
     let camera_dir = Point::new(0., 0., 1.);
     let camera_up = Vector(0., 1., 0.);
 
@@ -41,12 +41,14 @@ fn material(color: Color) -> Material {
 
 fn main() {
     let big_sphere = Sphere::unit().with_material(material(Color::new(1., 0.2, 1.)));
-    let small_sphere = Sphere::new(Point::new(0., 0., -0.5), 0.25)
-        .with_material(material(Color::new(0.2, 0.2, 1.)));
+    let upper_sphere = Sphere::new(Point::new(0.3, 0.1, -1.5), 0.1)
+        .with_material(material(Color::new(0.3, 0.3, 1.)));
+
     let light = PointLight::new(Color::WHITE, Point::new(10., 10., -10.));
 
     let mut world = World::new(light);
-    world.add_shape(small_sphere);
+
+    world.add_shape(upper_sphere);
     world.add_shape(big_sphere);
 
     let mut canvas = Canvas::square(512);

@@ -12,10 +12,13 @@ pub struct World {
 }
 
 struct RayHit<'a> {
-    point: Point,
     shape: &'a Sphere,
+    point: Point,
     shape_index: usize,
 }
+
+#[derive(Debug, PartialEq)]
+struct Intersection(usize, f64);
 
 impl RayHit<'_> {
     fn lightning(&self, light: &PointLight, ray_direction: &UnitVector) -> Color {
@@ -46,28 +49,37 @@ impl World {
     }
 
     fn hit_with_ray(&self, ray: &Ray) -> Option<RayHit> {
-        if let Some(shape) = self.shapes.first() {
-            let intersections = shape.intersect_with(ray);
-            if intersections.is_empty() {
-                return None;
-            } else {
-                let first_intersection = intersections[0];
-                let hit_point = ray.position(first_intersection);
-                let hit = RayHit {
-                    point: hit_point,
-                    shape: &shape,
-                    shape_index: 0,
-                };
-                return Some(hit);
+        self.intersections_with(ray).first().map(|inter| {
+            let Intersection(shape_index, position) = *inter;
+            RayHit {
+                point: ray.position(position),
+                shape: self.shapes.get(shape_index).unwrap(),
+                shape_index,
             }
-        } else {
-            None
-        }
+        })
+    }
+
+    fn intersections_with(&self, ray: &Ray<'_>) -> Vec<Intersection> {
+        let mut intersections: Vec<Intersection> = self
+            .shapes
+            .iter()
+            .enumerate()
+            .flat_map(|(i, shape)| {
+                shape
+                    .intersect_with(ray)
+                    .into_iter()
+                    .map(move |v| Intersection(i, v))
+            })
+            .collect();
+
+        intersections.sort_by(|a, b| a.1.total_cmp(&b.1));
+        intersections
     }
 }
 
 #[cfg(test)]
 mod tests {
+
     use crate::{
         drawing::Color,
         geometry::{Point, UnitVector},
