@@ -1,7 +1,7 @@
 use crate::{
     drawing::{Canvas, Color},
     geometry::{Normal, Point, Ray, UnitVector},
-    shapes::{Shape, Sphere},
+    shapes::Shape,
 };
 
 use super::{Camera, PointLight};
@@ -38,8 +38,8 @@ impl World {
         }
     }
 
-    pub fn add_shape(&mut self, shape: Sphere) -> usize {
-        self.shapes.push(Box::new(shape));
+    pub fn add_shape(&mut self, shape: Box<dyn Shape>) -> usize {
+        self.shapes.push(shape);
         self.shapes.len() - 1
     }
 
@@ -136,7 +136,7 @@ mod tests {
     #[test]
     fn intersect_world_with_ray() {
         let mut world = world_with_unit_sphere();
-        world.add_shape(Sphere::new(Point::ZERO, 0.5));
+        world.add_shape(Box::new(Sphere::new(Point::ZERO, 0.5)));
 
         let intersections = world.intersect_with(&RAY);
         let positions: Vec<f64> = intersections.into_iter().map(|i| i.1).collect();
@@ -175,8 +175,8 @@ mod tests {
         let front_shape = Sphere::new(Point::new(0., 0., -4.), 0.1);
         let back_shape = Sphere::new(Point::new(0., 0., -1.), 0.1);
 
-        world.add_shape(back_shape);
-        let front_shape_index = world.add_shape(front_shape);
+        world.add_shape(Box::new(back_shape));
+        let front_shape_index = world.add_shape(Box::new(front_shape));
         let hit = world.hit_with_ray(&RAY).unwrap();
 
         assert_eq!(hit.shape_index, front_shape_index);
@@ -184,7 +184,7 @@ mod tests {
 
     fn world_with_unit_sphere() -> World {
         let mut world = World::new(LIGHT);
-        world.add_shape(Sphere::new(Point::ZERO, 1.));
+        world.add_shape(Box::new(Sphere::new(Point::ZERO, 1.)));
         world
     }
 }
