@@ -58,7 +58,6 @@ fn floor() -> Plane {
 
 fn main() {
     let light = PointLight::new(Color::WHITE, Point::new(-10., 10., -10.));
-
     let mut world = World::new(light);
     world.add_shape(Box::new(floor()));
     world.add_shape(Box::new(middle_sphere()));
