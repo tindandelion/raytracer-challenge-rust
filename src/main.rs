@@ -11,6 +11,7 @@ use raycaster::PointLight;
 
 use raycaster::World;
 use shapes::Material;
+use shapes::Plane;
 use shapes::Sphere;
 
 mod drawing;
@@ -49,10 +50,17 @@ fn left_sphere() -> Sphere {
         .with_material(sphere_material(Color::new(1., 0.8, 0.1)))
 }
 
+fn floor() -> Plane {
+    let mut material = Material::default_with_color(Color::new(1., 0.9, 0.9));
+    material.specular = 0.;
+    Plane::new().with_material(material)
+}
+
 fn main() {
     let light = PointLight::new(Color::WHITE, Point::new(-10., 10., -10.));
 
     let mut world = World::new(light);
+    world.add_shape(Box::new(floor()));
     world.add_shape(Box::new(middle_sphere()));
     world.add_shape(Box::new(right_sphere()));
     world.add_shape(Box::new(left_sphere()));
