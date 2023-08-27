@@ -8,11 +8,11 @@ use super::{Camera, PointLight};
 
 pub struct World {
     light: PointLight,
-    shapes: Vec<Sphere>,
+    shapes: Vec<Box<dyn Shape>>,
 }
 
 struct RayHit<'a> {
-    shape: &'a Sphere,
+    shape: &'a Box<dyn Shape>,
     shape_index: usize,
     is_inside: bool,
     point: Point,
@@ -39,7 +39,7 @@ impl World {
     }
 
     pub fn add_shape(&mut self, shape: Sphere) -> usize {
-        self.shapes.push(shape);
+        self.shapes.push(Box::new(shape));
         self.shapes.len() - 1
     }
 
