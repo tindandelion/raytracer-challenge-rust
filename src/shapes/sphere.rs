@@ -1,11 +1,32 @@
 use crate::geometry::{Normal, Point, Ray};
 
-use super::Material;
+use super::{Material, Shape};
 
 pub struct Sphere {
     center: Point,
     radius: f64,
     material: Material,
+}
+
+impl Shape for Sphere {
+    fn material(&self) -> &Material {
+        &self.material
+    }
+
+    fn normal_at(&self, pt: &Point) -> Normal {
+        Normal::from(&(pt - &self.center))
+    }
+
+    fn intersect_with(&self, r: &Ray) -> Vec<f64> {
+        let sphere_to_ray = r.origin - &self.center;
+
+        let b = 2. * r.scalar_projection_of(&sphere_to_ray);
+        let c = sphere_to_ray.magnitude_squared() - self.radius * self.radius;
+
+        solve_quadratic_equation(1., b, c)
+            .map(|(x1, x2)| vec![x1, x2])
+            .unwrap_or(vec![])
+    }
 }
 
 impl Sphere {
@@ -20,25 +41,6 @@ impl Sphere {
     pub fn with_material(mut self, material: Material) -> Sphere {
         self.material = material;
         self
-    }
-
-    pub fn material(&self) -> &Material {
-        &self.material
-    }
-
-    pub fn normal_at(&self, pt: &Point) -> Normal {
-        Normal::from(&(pt - &self.center))
-    }
-
-    pub fn intersect_with(&self, r: &Ray) -> Vec<f64> {
-        let sphere_to_ray = r.origin - &self.center;
-
-        let b = 2. * r.scalar_projection_of(&sphere_to_ray);
-        let c = sphere_to_ray.magnitude_squared() - self.radius * self.radius;
-
-        solve_quadratic_equation(1., b, c)
-            .map(|(x1, x2)| vec![x1, x2])
-            .unwrap_or(vec![])
     }
 }
 
@@ -67,6 +69,7 @@ mod tests {
         use super::SPHERE;
 
         use crate::geometry::Point;
+        use crate::shapes::Shape;
 
         #[test]
         fn normal_towards_x_axis() {
@@ -96,7 +99,10 @@ mod tests {
 
     mod intersection {
         use super::SPHERE;
-        use crate::geometry::{Point, Ray, Vector};
+        use crate::{
+            geometry::{Point, Ray, Vector},
+            shapes::Shape,
+        };
 
         #[test]
         fn ray_misses_sphere() {

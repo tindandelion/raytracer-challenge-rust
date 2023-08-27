@@ -1,7 +1,7 @@
 use crate::{
     drawing::{Canvas, Color},
     geometry::{Normal, Point, Ray, UnitVector},
-    shapes::Sphere,
+    shapes::{Shape, Sphere},
 };
 
 use super::{Camera, PointLight};
