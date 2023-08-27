@@ -1,6 +1,5 @@
 use std::f64::consts::PI;
 
-use drawing::Canvas;
 use drawing::Color;
 
 use geometry::Point;
@@ -9,7 +8,6 @@ use geometry::Vector;
 use ppm::write_ppm;
 use raycaster::Camera;
 use raycaster::PointLight;
-use raycaster::Ray;
 
 use raycaster::World;
 use shapes::Material;
@@ -20,15 +18,6 @@ mod geometry;
 mod ppm;
 mod raycaster;
 mod shapes;
-
-fn scan(c_width: usize, c_height: usize, mut f: impl FnMut(&Ray, usize, usize) -> ()) {
-    let camera = create_camera(c_width, c_height);
-    for y in 0..c_height {
-        for x in 0..c_width {
-            camera.cast_ray_at(x, y, |r| f(&r, x, y));
-        }
-    }
-}
 
 fn create_camera(c_width: usize, c_height: usize) -> Camera {
     Camera::new(c_width, c_height, PI / 3.).with_transform(
@@ -68,10 +57,6 @@ fn main() {
     world.add_shape(right_sphere());
     world.add_shape(left_sphere());
 
-    let mut canvas = Canvas::new(1024, 512);
-    scan(canvas.width(), canvas.height(), |ray, px, py| {
-        let point_color = world.get_color(&ray).unwrap_or(Color::BLACK);
-        canvas.write_pixel(px, py, &point_color);
-    });
+    let canvas = world.render(&create_camera(1024, 512));
     write_ppm("output/test-output.ppm", &canvas).unwrap();
 }

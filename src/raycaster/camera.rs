@@ -3,6 +3,8 @@ use crate::geometry::{Matrix, Point, Vector};
 use super::Ray;
 
 pub struct Camera {
+    h_size: usize,
+    v_size: usize,
     half_view: f64,
     aspect_ratio: f64,
     pixel_size: f64,
@@ -33,8 +35,6 @@ impl ViewTransform {
 }
 
 impl Camera {
-    const CAMERA_POSITION: Point = Point::ZERO;
-
     pub fn new(h_size: usize, v_size: usize, field_of_view: f64) -> Camera {
         let half_view = (field_of_view / 2.).tan();
         let aspect_ratio = (v_size as f64) / (h_size as f64);
@@ -46,6 +46,8 @@ impl Camera {
         let transform = ViewTransform::default();
 
         Camera {
+            h_size,
+            v_size,
             half_view,
             pixel_size,
             aspect_ratio,
@@ -53,13 +55,29 @@ impl Camera {
         }
     }
 
+    pub fn h_size(&self) -> usize {
+        self.h_size
+    }
+
+    pub fn v_size(&self) -> usize {
+        self.v_size
+    }
+
     pub fn with_transform(mut self, from: &Point, to: &Point, up: &Vector) -> Self {
         self.transform = ViewTransform::new(from, to, up);
         self
     }
 
+    pub fn scan_space(&self, mut f: impl FnMut(&Ray, usize, usize) -> ()) {
+        for y in 0..self.v_size {
+            for x in 0..self.h_size {
+                self.cast_ray_at(x, y, |r| f(&r, x, y));
+            }
+        }
+    }
+
     pub fn cast_ray_at(&self, px: usize, py: usize, mut f: impl FnMut(&Ray) -> ()) {
-        let origin = self.transform.to_world(&Self::CAMERA_POSITION);
+        let origin = self.transform.to_world(&Point::ZERO);
         let pixel = self.transform.to_world(&self.view_pixel_at(px, py));
         f(&Ray::between(&origin, &pixel))
     }

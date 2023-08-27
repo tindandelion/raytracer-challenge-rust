@@ -1,10 +1,10 @@
 use crate::{
-    drawing::Color,
+    drawing::{Canvas, Color},
     geometry::{Normal, Point, UnitVector},
     shapes::Sphere,
 };
 
-use super::{PointLight, Ray};
+use super::{Camera, PointLight, Ray};
 
 pub struct World {
     light: PointLight,
@@ -43,7 +43,16 @@ impl World {
         self.shapes.len() - 1
     }
 
-    pub fn get_color(&self, ray: &Ray) -> Option<Color> {
+    pub fn render(&self, camera: &Camera) -> Canvas {
+        let mut canvas = Canvas::new(camera.h_size(), camera.v_size());
+        camera.scan_space(|ray, px, py| {
+            let point_color = self.get_color(&ray).unwrap_or(Color::BLACK);
+            canvas.write_pixel(px, py, &point_color);
+        });
+        canvas
+    }
+
+    fn get_color(&self, ray: &Ray) -> Option<Color> {
         self.hit_with_ray(&ray)
             .map(|hit| hit.lightning(&self.light))
     }
