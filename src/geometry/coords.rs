@@ -38,6 +38,17 @@ impl Point {
     const fn wrap_vector(pv: Vector) -> Point {
         Point { v: pv }
     }
+
+    pub fn x(&self) -> f64 {
+        self.v.0
+    }
+
+    pub fn y(&self) -> f64 {
+        self.v.1
+    }
+    pub fn z(&self) -> f64 {
+        self.v.2
+    }
 }
 
 impl Vector {
