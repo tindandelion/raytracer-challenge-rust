@@ -1,12 +1,35 @@
-use crate::geometry::Point;
+use crate::geometry::{Matrix, Point, Vector};
 
-use super::{view_transform::ViewTransform, Ray};
+use super::Ray;
 
 pub struct Camera {
     half_view: f64,
     aspect_ratio: f64,
     pixel_size: f64,
     transform: ViewTransform,
+}
+
+struct ViewTransform(Matrix);
+
+impl ViewTransform {
+    fn new(from: &Point, to: &Point, up: &Vector) -> ViewTransform {
+        let view_z = (to - from).normalize();
+        let up_norm = up.normalize();
+        let view_x = up_norm.v().cross(view_z.v()).normalize();
+        let view_y = view_z.v().cross(view_x.v()).normalize();
+
+        let orientation = Matrix::from_vectors(&view_x, &view_y, &view_z);
+        let transform = Matrix::translation(from.as_vector()) * orientation;
+        ViewTransform(transform)
+    }
+
+    fn default() -> ViewTransform {
+        Self::new(&Point::ZERO, &Point::new(0., 0., -1.), &Vector(0., 1., 0.))
+    }
+
+    fn to_world(&self, view_point: &Point) -> Point {
+        &self.0 * view_point
+    }
 }
 
 impl Camera {
@@ -20,7 +43,7 @@ impl Camera {
         } else {
             2. * half_view / (v_size as f64)
         };
-        let transform = ViewTransform::to(&Point::new(0., 0., -1.));
+        let transform = ViewTransform::default();
 
         Camera {
             half_view,
@@ -30,8 +53,9 @@ impl Camera {
         }
     }
 
-    pub fn set_transform(&mut self, transform: ViewTransform) {
-        self.transform = transform;
+    pub fn with_transform(mut self, from: &Point, to: &Point, up: &Vector) -> Self {
+        self.transform = ViewTransform::new(from, to, up);
+        self
     }
 
     pub fn cast_ray_at(&self, px: usize, py: usize, mut f: impl FnMut(&Ray) -> ()) {
@@ -50,13 +74,10 @@ impl Camera {
 }
 
 #[cfg(test)]
-mod tests {
+mod camera_tests {
     use std::f64::consts::PI;
 
-    use crate::{
-        geometry::{Point, Vector},
-        raycaster::view_transform::ViewTransform,
-    };
+    use crate::geometry::{Point, Vector};
 
     use super::Camera;
 
@@ -90,8 +111,12 @@ mod tests {
 
     #[test]
     fn direction_to_canvas_corner_with_positive_z_direction() {
-        let mut c = Camera::new(201, 101, PI / 2.);
-        c.set_transform(ViewTransform::to(&Point::new(0., 0., 1.)));
+        let c = Camera::new(201, 101, PI / 2.).with_transform(
+            &Point::ZERO,
+            &Point::new(0., 0., 1.),
+            &Vector(0., 1., 0.),
+        );
+
         c.cast_ray_at(0, 0, |r| {
             assert_eq!(r.direction.v(), &Vector(-0.665186, 0.332593, 0.668512))
         });
@@ -99,5 +124,48 @@ mod tests {
 
     fn assert_approx_eq(left: f64, right: f64) {
         assert!((left - right).abs() < 0.0001, "{:?} != {:?}", left, right);
+    }
+}
+
+#[cfg(test)]
+mod view_transform_tests {
+    use std::f64::consts::SQRT_2;
+
+    use crate::geometry::{Point, UnitVector, Vector};
+
+    use super::ViewTransform;
+
+    #[test]
+    fn choose_view_direction_in_xz_plane() {
+        let view_up = UnitVector::Y.v();
+        let look_at = Point::new(1., 0., -1.);
+        let transform = ViewTransform::new(&Point::ZERO, &look_at, &view_up);
+
+        let view_point = Point::new(0., 0., SQRT_2);
+        let world_point = transform.to_world(&view_point);
+        assert_eq!(world_point, look_at);
+    }
+
+    #[test]
+    fn specify_custom_up_direction() {
+        let look_at = Point::new(0., 0., 1.);
+        let up = Vector(1., 1., 1.);
+        let transform = ViewTransform::new(&Point::ZERO, &look_at, &up);
+
+        let view_point = Point::new(1., 1., 5.);
+        let world_point = transform.to_world(&view_point);
+        assert_eq!(world_point, Point::new(SQRT_2, 0., 5.))
+    }
+
+    #[test]
+    fn specify_custom_from_point() {
+        let view_up = UnitVector::Y.v();
+        let look_at = Point::ZERO;
+        let look_from = Point::new(2., 0., -2.);
+        let transform = ViewTransform::new(&look_from, &look_at, &view_up);
+
+        let view_point = Point::new(0., 0., SQRT_2);
+        let world_point = transform.to_world(&view_point);
+        assert_eq!(world_point, Point::new(1., 0., -1.))
     }
 }

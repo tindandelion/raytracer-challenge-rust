@@ -10,7 +10,7 @@ use ppm::write_ppm;
 use raycaster::Camera;
 use raycaster::PointLight;
 use raycaster::Ray;
-use raycaster::ViewTransform;
+
 use raycaster::World;
 use shapes::Material;
 use shapes::Sphere;
@@ -22,17 +22,20 @@ mod raycaster;
 mod shapes;
 
 fn scan(c_width: usize, c_height: usize, mut f: impl FnMut(&Ray, usize, usize) -> ()) {
-    let mut camera = Camera::new(c_width, c_height, PI / 3.);
-    let camera_pos = Point::new(0., 1.5, -5.);
-    let camera_dir = Point::new(0., 1., 0.);
-    let camera_up = Vector(0., 1., 0.);
-
-    camera.set_transform(ViewTransform::new(&camera_pos, &camera_dir, &camera_up));
+    let camera = create_camera(c_width, c_height);
     for y in 0..c_height {
         for x in 0..c_width {
             camera.cast_ray_at(x, y, |r| f(&r, x, y));
         }
     }
+}
+
+fn create_camera(c_width: usize, c_height: usize) -> Camera {
+    Camera::new(c_width, c_height, PI / 3.).with_transform(
+        &Point::new(0., 1.5, -5.),
+        &Point::new(0., 1., 0.),
+        &Vector(0., 1., 0.),
+    )
 }
 
 fn sphere_material(color: Color) -> Material {
