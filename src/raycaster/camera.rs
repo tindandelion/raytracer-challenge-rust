@@ -1,6 +1,4 @@
-use crate::geometry::{Matrix, Point, Vector};
-
-use super::Ray;
+use crate::geometry::{Matrix, Point, Ray, Vector};
 
 pub struct Camera {
     h_size: usize,

@@ -1,4 +1,4 @@
-use crate::geometry::{Point, UnitVector, Vector};
+use super::{Point, UnitVector, Vector};
 
 pub struct Ray<'a> {
     pub origin: &'a Point,

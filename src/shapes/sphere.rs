@@ -1,7 +1,4 @@
-use crate::{
-    geometry::{Normal, Point},
-    raycaster::Ray,
-};
+use crate::geometry::{Normal, Point, Ray};
 
 use super::Material;
 
@@ -99,10 +96,7 @@ mod tests {
 
     mod intersection {
         use super::SPHERE;
-        use crate::{
-            geometry::{Point, Vector},
-            raycaster::Ray,
-        };
+        use crate::geometry::{Point, Ray, Vector};
 
         #[test]
         fn ray_misses_sphere() {

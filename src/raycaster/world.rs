@@ -1,10 +1,10 @@
 use crate::{
     drawing::{Canvas, Color},
-    geometry::{Normal, Point, UnitVector},
+    geometry::{Normal, Point, Ray, UnitVector},
     shapes::Sphere,
 };
 
-use super::{Camera, PointLight, Ray};
+use super::{Camera, PointLight};
 
 pub struct World {
     light: PointLight,
@@ -104,8 +104,8 @@ mod tests {
 
     use crate::{
         drawing::Color,
-        geometry::{Normal, Point, UnitVector, Vector},
-        raycaster::{PointLight, Ray},
+        geometry::{Normal, Point, Ray, UnitVector, Vector},
+        raycaster::PointLight,
         shapes::Sphere,
     };
 
