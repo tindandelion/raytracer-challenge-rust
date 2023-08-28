@@ -43,7 +43,7 @@ impl Material {
     }
 
     fn diffuse(&self, light_direction: &UnitVector, normal: &Normal) -> f64 {
-        let light_dot_normal = normal.dot(light_direction.v());
+        let light_dot_normal = normal.dot(&light_direction);
         if light_dot_normal < 0. {
             return 0.;
         }
@@ -56,7 +56,7 @@ impl Material {
         eye_direction: &UnitVector,
         normal: &Normal,
     ) -> f64 {
-        let reflection = normal.reflect(light_direction.v());
+        let reflection = normal.reflect(&light_direction);
         let reflect_dot_eye = eye_direction.dot(&reflection);
         if (reflect_dot_eye) <= 0. {
             return 0.;

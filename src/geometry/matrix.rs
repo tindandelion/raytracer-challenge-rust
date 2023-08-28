@@ -39,15 +39,12 @@ impl Matrix {
     }
 
     pub fn from_vectors(x: &UnitVector, y: &UnitVector, z: &UnitVector) -> Matrix {
-        let x_v = x.v();
-        let y_v = y.v();
-        let z_v = z.v();
         #[rustfmt::skip]
         let matrix = [
-            x_v.0, y_v.0, z_v.0, 0., 
-            x_v.1, y_v.1, z_v.1, 0., 
-            x_v.2, y_v.2, z_v.2, 0., 
-            0.,    0.,    0.,    1.,
+            x.0, y.0, z.0, 0., 
+            x.1, y.1, z.1, 0., 
+            x.2, y.2, z.2, 0., 
+            0.,  0.,  0.,  1.,
         ];
         Matrix(matrix)
     }

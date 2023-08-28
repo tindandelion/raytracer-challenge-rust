@@ -27,11 +27,11 @@ impl Shape for Plane {
     }
 
     fn normal_at(&self, _pt: &Point) -> Normal {
-        Normal::from(UnitVector::Y.v())
+        Normal::from(&UnitVector::Y)
     }
 
     fn intersect_with(&self, ray: &geometry::Ray) -> Vec<f64> {
-        let direction_y = ray.direction.v().1;
+        let direction_y = ray.direction.1;
         if direction_y.abs() < Plane::EPSILON {
             vec![]
         } else {

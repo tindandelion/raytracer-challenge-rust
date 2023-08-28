@@ -15,8 +15,8 @@ impl ViewTransform {
     fn new(from: &Point, to: &Point, up: &Vector) -> ViewTransform {
         let view_z = (to - from).normalize();
         let up_norm = up.normalize();
-        let view_x = up_norm.v().cross(view_z.v()).normalize();
-        let view_y = view_z.v().cross(view_x.v()).normalize();
+        let view_x = up_norm.cross(&view_z).normalize();
+        let view_y = view_z.cross(&view_x).normalize();
 
         let orientation = Matrix::from_vectors(&view_x, &view_y, &view_z);
         let transform = Matrix::translation(from.as_vector()) * orientation;
@@ -112,16 +112,14 @@ mod camera_tests {
     #[test]
     fn direction_to_the_canvas_center() {
         let c = Camera::new(201, 101, PI / 2.);
-        c.cast_ray_at(100, 50, |r| {
-            assert_eq!(r.direction.v(), &Vector(0., 0., -1.))
-        });
+        c.cast_ray_at(100, 50, |r| assert_eq!(*r.direction, Vector(0., 0., -1.)));
     }
 
     #[test]
     fn direction_to_canvas_corner() {
         let c = Camera::new(201, 101, PI / 2.);
         c.cast_ray_at(0, 0, |r| {
-            assert_eq!(r.direction.v(), &Vector(0.665186, 0.332593, -0.668512))
+            assert_eq!(*r.direction, Vector(0.665186, 0.332593, -0.668512))
         });
     }
 
@@ -134,7 +132,7 @@ mod camera_tests {
         );
 
         c.cast_ray_at(0, 0, |r| {
-            assert_eq!(r.direction.v(), &Vector(-0.665186, 0.332593, 0.668512))
+            assert_eq!(*r.direction, Vector(-0.665186, 0.332593, 0.668512))
         });
     }
 
@@ -153,7 +151,7 @@ mod view_transform_tests {
 
     #[test]
     fn choose_view_direction_in_xz_plane() {
-        let view_up = UnitVector::Y.v();
+        let view_up = UnitVector::Y;
         let look_at = Point::new(1., 0., -1.);
         let transform = ViewTransform::new(&Point::ZERO, &look_at, &view_up);
 
@@ -175,7 +173,7 @@ mod view_transform_tests {
 
     #[test]
     fn specify_custom_from_point() {
-        let view_up = UnitVector::Y.v();
+        let view_up = UnitVector::Y;
         let look_at = Point::ZERO;
         let look_from = Point::new(2., 0., -2.);
         let transform = ViewTransform::new(&look_from, &look_at, &view_up);

@@ -1,13 +1,11 @@
 use overload::overload;
-use std::ops::{self};
+use std::ops::{self, Deref};
 
 #[derive(Debug)]
 pub struct Vector(pub f64, pub f64, pub f64);
 
 #[derive(Debug, PartialEq)]
-pub struct UnitVector {
-    v: Vector,
-}
+pub struct UnitVector(Vector);
 
 #[derive(Debug)]
 pub struct Point {
@@ -88,30 +86,24 @@ impl Vector {
 }
 
 impl UnitVector {
-    pub const X: UnitVector = UnitVector {
-        v: Vector(1., 0., 0.),
-    };
-    pub const Y: UnitVector = UnitVector {
-        v: Vector(0., 1., 0.),
-    };
-    pub const Z: UnitVector = UnitVector {
-        v: Vector(0., 0., 1.),
-    };
+    pub const X: UnitVector = UnitVector(Vector(1., 0., 0.));
+    pub const Y: UnitVector = UnitVector(Vector(0., 1., 0.));
+    pub const Z: UnitVector = UnitVector(Vector(0., 0., 1.));
 
     fn new(v: Vector) -> UnitVector {
-        UnitVector { v }
-    }
-
-    pub fn v(&self) -> &Vector {
-        &self.v
-    }
-
-    pub fn dot(&self, other: &Vector) -> f64 {
-        self.v.dot(other)
+        UnitVector(v)
     }
 
     pub fn flip(&self) -> UnitVector {
-        UnitVector { v: -&self.v }
+        UnitVector(-&self.0)
+    }
+}
+
+impl Deref for UnitVector {
+    type Target = Vector;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
     }
 }
 
@@ -212,10 +204,10 @@ mod tests {
 
     #[test]
     fn normalize_vector() {
-        assert_eq!(Vector(4., 0., 0.).normalize().v(), &Vector(1., 0., 0.));
+        assert_eq!(*Vector(4., 0., 0.).normalize(), Vector(1., 0., 0.));
         assert_eq!(
-            Vector(1., 2., 2.).normalize().v(),
-            &Vector(1. / 3., 2. / 3., 2. / 3.)
+            *Vector(1., 2., 2.).normalize(),
+            Vector(1. / 3., 2. / 3., 2. / 3.)
         );
     }
 
@@ -224,7 +216,7 @@ mod tests {
         assert!(!Vector(4., 0., 0.).is_unit(), "Non-unit vector");
         assert!(Vector(1., 0., 0.).is_unit(), "Unit vector by default");
         assert!(
-            Vector(1., 1., 0.).normalize().v().is_unit(),
+            Vector(1., 1., 0.).normalize().is_unit(),
             "Vector after normalization"
         );
     }

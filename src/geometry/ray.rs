@@ -1,3 +1,5 @@
+use std::ops::Deref;
+
 use super::{Point, UnitVector, Vector};
 
 pub struct Ray<'a> {
@@ -16,7 +18,7 @@ impl<'a> Ray<'a> {
     }
 
     pub fn position(&self, distance: f64) -> Point {
-        self.origin + self.direction.v() * distance
+        self.origin + self.direction.deref() * distance
     }
 
     pub fn scalar_projection_of(&self, v: &Vector) -> f64 {
@@ -35,7 +37,7 @@ mod tests {
         let origin = Point::ZERO;
         let destination = Point::new(1., 1., 0.);
         let ray = Ray::between(&origin, &destination);
-        assert_eq!(ray.direction.v(), &Vector(SQRT_2 / 2., SQRT_2 / 2., 0.))
+        assert_eq!(*ray.direction, Vector(SQRT_2 / 2., SQRT_2 / 2., 0.))
     }
 
     #[test]
