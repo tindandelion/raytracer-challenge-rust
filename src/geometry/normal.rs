@@ -3,29 +3,23 @@ use std::ops::Deref;
 use super::{UnitVector, Vector};
 
 #[derive(PartialEq, Debug)]
-pub struct Normal {
-    direction: UnitVector,
-}
+pub struct Normal(UnitVector);
 
 impl Normal {
     pub fn from(v: &Vector) -> Normal {
-        Normal {
-            direction: v.normalize(),
-        }
+        Normal(v.normalize())
     }
 
     pub fn dot(&self, v: &Vector) -> f64 {
-        self.direction.dot(v)
+        self.0.dot(v)
     }
 
     pub fn reflect(&self, incoming: &Vector) -> Vector {
-        -incoming + self.direction.deref() * 2. * incoming.dot(&self.direction)
+        -incoming + self.0.deref() * 2. * incoming.dot(&self.0)
     }
 
     pub fn flip(&self) -> Normal {
-        Normal {
-            direction: self.direction.flip(),
-        }
+        Normal(self.0.flip())
     }
 }
 
@@ -46,7 +40,7 @@ mod tests {
         let v = Vector(1., 1., 0.);
         let n = Normal::from(&v);
 
-        assert_eq!(*n.direction, Vector(SQRT_2 / 2., SQRT_2 / 2., 0.));
+        assert_eq!(*n.0, Vector(SQRT_2 / 2., SQRT_2 / 2., 0.));
     }
 
     #[test]
