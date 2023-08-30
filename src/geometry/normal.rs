@@ -1,6 +1,6 @@
-use std::ops::Deref;
+use std::{f64::EPSILON, ops::Deref};
 
-use super::{UnitVector, Vector};
+use super::{Point, UnitVector, Vector};
 
 #[derive(PartialEq, Debug)]
 pub struct Normal(UnitVector);
@@ -20,6 +20,10 @@ impl Normal {
 
     pub fn flip(&self) -> Normal {
         Normal(self.0.flip())
+    }
+
+    pub fn over_point(&self, point: &Point) -> Point {
+        point + self.0.deref() * 1e-8
     }
 }
 

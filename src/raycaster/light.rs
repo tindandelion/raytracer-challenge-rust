@@ -19,4 +19,8 @@ impl PointLight {
     pub fn direction_from(&self, pt: &Point) -> UnitVector {
         (&self.position - pt).normalize()
     }
+
+    pub fn distance_from(&self, point: &Point) -> f64 {
+        (&self.position - point).magnitude()
+    }
 }
