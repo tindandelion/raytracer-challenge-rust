@@ -1,4 +1,4 @@
-use std::{f64::EPSILON, ops::Deref};
+use std::ops::Deref;
 
 use super::{Point, UnitVector, Vector};
 
