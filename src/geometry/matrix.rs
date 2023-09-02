@@ -7,6 +7,7 @@ pub struct Matrix([f64; 16]);
 
 overload!((a: ?Matrix) * (b: ?Matrix) -> Matrix { a.mul_matrix(&b) });
 overload!((a: ?Matrix) * (p: ?Point) -> Point { a.mul_point(&p) });
+overload!((a: ?Matrix) * (v: ?Vector) -> Vector { a.mul_vector(&v) });
 
 impl Matrix {
     pub const IDENTITY: Matrix = Matrix([
@@ -35,6 +36,15 @@ impl Matrix {
             0., 1., 0., v.1, 
             0., 0., 1., v.2, 
             0., 0., 0., 1.
+        ])
+    }
+
+    pub fn rotate_x(angle: f64) -> Matrix {
+        Matrix([
+            1.,          0.,           0., 0., 
+            0., angle.cos(), -angle.sin(), 0.,
+            0., angle.sin(),  angle.cos(), 0., 
+            0.,          0.,           0., 1.
         ])
     }
 
@@ -70,6 +80,14 @@ impl Matrix {
         )
     }
 
+    pub fn mul_vector(&self, v: &Vector) -> Vector {
+        Vector(
+            v.0 * self.el(0, 0) + v.1 * self.el(0, 1) + v.2 * self.el(0, 2),
+            v.0 * self.el(1, 0) + v.1 * self.el(1, 1) + v.2 * self.el(1, 2),
+            v.0 * self.el(2, 0) + v.1 * self.el(2, 1) + v.2 * self.el(2, 2),
+        )
+    }
+
     fn el(&self, row: usize, col: usize) -> f64 {
         self.0[row * 4 + col]
     }
@@ -86,6 +104,14 @@ mod transform_tests {
         let p = Point::new(-3., 4., 5.);
         assert_eq!(transform * p, Point::new(2., 1., 7.))
     }
+
+    #[test]
+    fn translate_vector_does_not_affect_it() {
+        let transform = Matrix::translation(&Vector(5., -3., 2.));
+        let v = Vector(-3., 4., 5.);
+        assert_eq!(transform * &v, v)
+    }
+
 }
 
 #[cfg(test)]

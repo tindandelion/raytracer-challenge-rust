@@ -1,6 +1,6 @@
 use std::ops::Deref;
 
-use super::{Point, UnitVector, Vector};
+use super::{Matrix, Point, UnitVector, Vector};
 
 pub struct Ray {
     pub origin: Point,
@@ -24,11 +24,18 @@ impl Ray {
     pub fn scalar_projection_of(&self, v: &Vector) -> f64 {
         self.direction.dot(v)
     }
+
+    pub fn transform(&self, m: &Matrix) -> Ray {
+        Ray {
+            origin: m * &self.origin,
+            direction: (m * self.direction.deref()).normalize(),
+        }
+    }
 }
 
 #[cfg(test)]
 mod tests {
-    use std::f64::consts::SQRT_2;
+    use std::f64::consts::{PI, SQRT_2};
 
     use super::*;
 
@@ -69,5 +76,25 @@ mod tests {
             -1.,
             "Opposite direction vector"
         );
+    }
+
+    #[test]
+    fn translate_ray() {
+        let ray = Ray::new(Point::new(1., 2., 3.), UnitVector::Y);
+        let m = Matrix::translation(&Vector(3., 4., 5.));
+
+        let transformed = ray.transform(&m);
+        assert_eq!(transformed.origin, Point::new(4., 6., 8.));
+        assert_eq!(transformed.direction, UnitVector::Y);
+    }
+
+    #[test]
+    fn rotate_ray() {
+        let ray = Ray::new(Point::new(1., 2., 3.), UnitVector::Y);
+        let m = Matrix::rotate_x(PI / 2.);
+
+        let transformed = ray.transform(&m);
+        assert_eq!(transformed.origin, Point::new(1., -3., 2.));
+        assert_eq!(transformed.direction, UnitVector::Z);
     }
 }
