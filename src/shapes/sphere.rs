@@ -18,7 +18,7 @@ impl Shape for Sphere {
     }
 
     fn intersect_with(&self, r: &Ray) -> Vec<f64> {
-        let sphere_to_ray = r.origin - &self.center;
+        let sphere_to_ray = &r.origin - &self.center;
 
         let b = 2. * r.scalar_projection_of(&sphere_to_ray);
         let c = sphere_to_ray.magnitude_squared() - self.radius * self.radius;
@@ -136,7 +136,7 @@ mod tests {
 
         fn intersections_with_ray_from_origin(origin: Point) -> Vec<f64> {
             let z_axis = Vector(0., 0., 1.).normalize();
-            let ray = Ray::new(&origin, z_axis);
+            let ray = Ray::new(origin, z_axis);
             SPHERE.intersect_with(&ray)
         }
     }

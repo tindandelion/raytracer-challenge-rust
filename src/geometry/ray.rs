@@ -2,23 +2,23 @@ use std::ops::Deref;
 
 use super::{Point, UnitVector, Vector};
 
-pub struct Ray<'a> {
-    pub origin: &'a Point,
+pub struct Ray {
+    pub origin: Point,
     pub direction: UnitVector,
 }
 
-impl<'a> Ray<'a> {
-    pub const fn new(origin: &'a Point, direction: UnitVector) -> Ray<'a> {
+impl Ray {
+    pub const fn new(origin: Point, direction: UnitVector) -> Ray {
         Ray { origin, direction }
     }
 
-    pub fn between(origin: &'a Point, dest: &Point) -> Ray<'a> {
+    pub fn between(origin: &Point, dest: &Point) -> Ray {
         let direction = (dest - origin).normalize();
-        Self::new(origin, direction)
+        Self::new(origin.clone(), direction)
     }
 
     pub fn position(&self, distance: f64) -> Point {
-        self.origin + self.direction.deref() * distance
+        &self.origin + self.direction.deref() * distance
     }
 
     pub fn scalar_projection_of(&self, v: &Vector) -> f64 {
@@ -42,8 +42,7 @@ mod tests {
 
     #[test]
     fn compute_point_from_distance() {
-        let origin = Point::new(2., 3., 4.);
-        let ray = Ray::new(&origin, Vector(1., 0., 0.).normalize());
+        let ray = Ray::new(Point::new(2., 3., 4.), Vector(1., 0., 0.).normalize());
 
         assert_eq!(Point::new(2., 3., 4.), ray.position(0.));
         assert_eq!(Point::new(3., 3., 4.), ray.position(1.));
@@ -53,8 +52,7 @@ mod tests {
 
     #[test]
     fn compute_vector_projection() {
-        let origin = Point::new(2., 3., 4.);
-        let ray = Ray::new(&origin, Vector(1., 0., 0.).normalize());
+        let ray = Ray::new(Point::new(2., 3., 4.), Vector(1., 0., 0.).normalize());
 
         assert_eq!(
             ray.scalar_projection_of(&Vector(1., 1., 0.)),

@@ -1,24 +1,20 @@
 use overload::overload;
 use std::ops::{self, Deref};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Vector(pub f64, pub f64, pub f64);
-
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct UnitVector(Vector);
-
-#[derive(Debug)]
-pub struct Point {
-    v: Vector,
-}
+#[derive(Debug, Clone)]
+pub struct Point(Vector);
 
 overload!(- (a: ?Vector) -> Vector { Vector(-a.0, -a.1, -a.2) });
 
-overload!((a: ?Vector) + (b: ?Point) -> Point { Point::wrap_vector(a + &b.v) });
+overload!((a: ?Vector) + (b: ?Point) -> Point { Point::wrap_vector(a + &b.0) });
 overload!((a: ?Vector) + (b: ?Vector) -> Vector { Vector(a.0 + b.0, a.1 + b.1, a.2 + b.2) });
 overload!((a: ?Point) + (b: ?Vector) -> Point { b + a });
 
-overload!((a: ?Point) - (b: ?Point) -> Vector { &a.v - &b.v });
+overload!((a: ?Point) - (b: ?Point) -> Vector { &a.0 - &b.0 });
 overload!((a: ?Point) - (b: ?Vector) -> Point { -b + a });
 overload!((a: ?Vector) - (b: ?Vector) -> Vector { -b + a });
 
@@ -34,18 +30,18 @@ impl Point {
     }
 
     const fn wrap_vector(pv: Vector) -> Point {
-        Point { v: pv }
+        Point(pv)
     }
 
     pub fn x(&self) -> f64 {
-        self.v.0
+        self.0 .0
     }
 
     pub fn y(&self) -> f64 {
-        self.v.1
+        self.0 .1
     }
     pub fn z(&self) -> f64 {
-        self.v.2
+        self.0 .2
     }
 }
 
@@ -109,7 +105,7 @@ impl Deref for UnitVector {
 
 impl Point {
     pub fn as_vector(&self) -> &Vector {
-        &self.v
+        &self.0
     }
 }
 

@@ -59,8 +59,7 @@ mod tests {
 
     #[test]
     pub fn intersect_with_parallel_ray() {
-        let ray_origin = Point::new(0., 10., 0.);
-        let ray = Ray::new(&ray_origin, UnitVector::Z);
+        let ray = Ray::new(Point::new(0., 10., 0.), UnitVector::Z);
 
         let intersections = PLANE.intersect_with(&ray);
         assert!(intersections.is_empty())
@@ -68,8 +67,7 @@ mod tests {
 
     #[test]
     pub fn intersect_with_coplanar_ray() {
-        let ray_origin = Point::new(0., 0., 0.);
-        let ray = Ray::new(&ray_origin, UnitVector::Z);
+        let ray = Ray::new(Point::new(0., 0., 0.), UnitVector::Z);
 
         let intersections = PLANE.intersect_with(&ray);
         assert!(intersections.is_empty())
@@ -77,8 +75,7 @@ mod tests {
 
     #[test]
     pub fn intersect_with_ray_from_above() {
-        let ray_origin = Point::new(0., 1., 0.);
-        let ray = Ray::new(&ray_origin, UnitVector::Y.flip());
+        let ray = Ray::new(Point::new(0., 1., 0.), UnitVector::Y.flip());
 
         let intersections = PLANE.intersect_with(&ray);
         assert_eq!(intersections, vec![1.])
@@ -86,8 +83,7 @@ mod tests {
 
     #[test]
     pub fn intersect_with_ray_from_below() {
-        let ray_origin = Point::new(0., -1., 0.);
-        let ray = Ray::new(&ray_origin, UnitVector::Y);
+        let ray = Ray::new(Point::new(0., -1., 0.), UnitVector::Y);
 
         let intersections = PLANE.intersect_with(&ray);
         assert_eq!(intersections, vec![1.])

@@ -65,7 +65,7 @@ impl World {
     fn is_shadowed(&self, point: &Point) -> bool {
         let distance_to_light = self.light.distance_from(point);
         let direction_to_light = self.light.direction_from(point);
-        let shadow_ray = Ray::new(point, direction_to_light);
+        let shadow_ray = Ray::new(point.clone(), direction_to_light);
         self.first_intersection_with(&shadow_ray)
             .map(|Intersection(_, distance)| distance < distance_to_light)
             .unwrap_or(false)
@@ -95,11 +95,11 @@ impl World {
             })
     }
 
-    fn first_intersection_with(&self, ray: &Ray<'_>) -> Option<Intersection> {
+    fn first_intersection_with(&self, ray: &Ray) -> Option<Intersection> {
         self.intersect_with(ray).first().copied()
     }
 
-    fn intersect_with(&self, ray: &Ray<'_>) -> Vec<Intersection> {
+    fn intersect_with(&self, ray: &Ray) -> Vec<Intersection> {
         let mut intersections: Vec<Intersection> = self
             .shapes
             .iter()
@@ -142,7 +142,7 @@ mod tests {
         use super::*;
 
         const RAY_ORIGIN: Point = Point::new(0., 0., -5.);
-        const RAY: Ray = Ray::new(&RAY_ORIGIN, UnitVector::Z);
+        const RAY: Ray = Ray::new(RAY_ORIGIN, UnitVector::Z);
 
         #[test]
         fn empty_world_produces_no_intersections() {
@@ -165,7 +165,7 @@ mod tests {
         #[test]
         fn ignore_intersections_in_negative_directions() {
             let world = world_with_unit_sphere();
-            let ray_from_inside = Ray::new(&Point::ZERO, UnitVector::Z);
+            let ray_from_inside = Ray::new(Point::ZERO, UnitVector::Z);
 
             let intersections = world.intersect_with(&ray_from_inside);
             let positions: Vec<f64> = intersections.into_iter().map(|i| i.1).collect();
@@ -186,7 +186,7 @@ mod tests {
         #[test]
         fn ray_hits_object_from_inside_flips_the_normal() {
             let world = world_with_unit_sphere();
-            let ray_from_inside = Ray::new(&Point::ZERO, UnitVector::Z);
+            let ray_from_inside = Ray::new(Point::ZERO, UnitVector::Z);
             let hit = world.hit_with_ray(&ray_from_inside).unwrap();
 
             assert_eq!(hit.shape_index, 0);
