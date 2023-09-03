@@ -1,13 +1,18 @@
 use overload::overload;
-use std::ops::{self};
+use std::ops::{self, Deref};
 use super::{UnitVector, Point, Vector};
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Matrix([f64; 16]);
 
-overload!((a: ?Matrix) * (b: ?Matrix) -> Matrix { a.mul_matrix(&b) });
-overload!((a: ?Matrix) * (p: ?Point) -> Point { a.mul_point(&p) });
-overload!((a: ?Matrix) * (v: ?Vector) -> Vector { a.mul_vector(&v) });
+pub trait MatMul<T> {
+    fn matmul(&self, m: &Matrix) -> T;
+}
+
+overload!((a: ?Matrix) * (b: ?Matrix) -> Matrix { a.matmul(&b) });
+overload!((a: ?Matrix) * (p: ?Point) -> Point { p.matmul(&a) });
+overload!((a: ?Matrix) * (v: ?Vector) -> Vector { v.matmul(&a) });
+
 
 impl Matrix {
     pub const IDENTITY: Matrix = Matrix([
@@ -59,8 +64,18 @@ impl Matrix {
         Matrix(matrix)
     }
 
-    pub fn mul_matrix(&self, other: &Matrix) -> Matrix {
-        let mut result = Self::zero();
+    pub fn mul<R, T: MatMul<R>>(&self, arg: &T) -> R {
+        arg.matmul(self)
+    }
+
+    fn el(&self, row: usize, col: usize) -> f64 {
+        self.0[row * 4 + col]
+    }
+}
+
+impl MatMul<Matrix> for Matrix {
+    fn matmul(&self, other: &Matrix) -> Matrix {
+        let mut result = Matrix::zero();
         for row in 0..4 {
             for col in 0..4 {
                 for i in 0..4 {
@@ -70,26 +85,32 @@ impl Matrix {
         }
         result
     }
+}
 
-    pub fn mul_point(&self, point: &Point) -> Point {
-        let v = point.as_vector();
+impl MatMul<Point> for Point {
+    fn matmul(&self, m: &Matrix) -> Point {
+        let v = self.as_vector();
         Point::new(
-            v.0 * self.el(0, 0) + v.1 * self.el(0, 1) + v.2 * self.el(0, 2) + self.el(0, 3),
-            v.0 * self.el(1, 0) + v.1 * self.el(1, 1) + v.2 * self.el(1, 2) + self.el(1, 3),
-            v.0 * self.el(2, 0) + v.1 * self.el(2, 1) + v.2 * self.el(2, 2) + self.el(2, 3),
+            v.0 * m.el(0, 0) + v.1 * m.el(0, 1) + v.2 * m.el(0, 2) + m.el(0, 3),
+            v.0 * m.el(1, 0) + v.1 * m.el(1, 1) + v.2 * m.el(1, 2) + m.el(1, 3),
+            v.0 * m.el(2, 0) + v.1 * m.el(2, 1) + v.2 * m.el(2, 2) + m.el(2, 3),
         )
     }
+}
 
-    pub fn mul_vector(&self, v: &Vector) -> Vector {
+impl MatMul<Vector> for Vector {
+    fn matmul(&self, m: &Matrix) -> Vector {
         Vector(
-            v.0 * self.el(0, 0) + v.1 * self.el(0, 1) + v.2 * self.el(0, 2),
-            v.0 * self.el(1, 0) + v.1 * self.el(1, 1) + v.2 * self.el(1, 2),
-            v.0 * self.el(2, 0) + v.1 * self.el(2, 1) + v.2 * self.el(2, 2),
+            self.0 * m.el(0, 0) + self.1 * m.el(0, 1) + self.2 * m.el(0, 2),
+            self.0 * m.el(1, 0) + self.1 * m.el(1, 1) + self.2 * m.el(1, 2),
+            self.0 * m.el(2, 0) + self.1 * m.el(2, 1) + self.2 * m.el(2, 2),
         )
     }
+}
 
-    fn el(&self, row: usize, col: usize) -> f64 {
-        self.0[row * 4 + col]
+impl MatMul<Vector> for UnitVector {
+    fn matmul(&self, m: &Matrix) -> Vector {
+        self.deref().matmul(m)
     }
 }
 

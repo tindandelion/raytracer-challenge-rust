@@ -13,6 +13,7 @@ use raycaster::World;
 use shapes::Material;
 use shapes::Plane;
 use shapes::Sphere;
+use shapes::Transform;
 
 mod drawing;
 mod geometry;
@@ -50,6 +51,14 @@ fn left_sphere() -> Sphere {
         .with_material(sphere_material(Color::new(1., 0.8, 0.1)))
 }
 
+fn backdrop() -> Plane {
+    let mut material = Material::default_with_color(Color::new(0.7, 0.6, 0.6));
+    material.specular = 0.;
+    Plane::new().with_material(material).with_transform(
+        Transform::rotate_x(PI / 2.).and_then(&Transform::translate(&Vector(0., 0., 3.))),
+    )
+}
+
 fn floor() -> Plane {
     let mut material = Material::default_with_color(Color::new(1., 0.9, 0.9));
     material.specular = 0.;
@@ -60,6 +69,7 @@ fn main() {
     let light = PointLight::new(Color::WHITE, Point::new(-10., 10., -10.));
     let mut world = World::new(light);
     world.add_shape(Box::new(floor()));
+    world.add_shape(Box::new(backdrop()));
     world.add_shape(Box::new(middle_sphere()));
     world.add_shape(Box::new(right_sphere()));
     world.add_shape(Box::new(left_sphere()));

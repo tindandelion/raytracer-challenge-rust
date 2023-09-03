@@ -4,6 +4,6 @@ mod normal;
 mod ray;
 
 pub use coords::*;
-pub use matrix::Matrix;
+pub use matrix::{MatMul, Matrix};
 pub use normal::Normal;
 pub use ray::Ray;

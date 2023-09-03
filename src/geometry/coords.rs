@@ -76,6 +76,10 @@ impl Vector {
         )
     }
 
+    pub fn flip(&self) -> Vector {
+        Vector(-self.0, -self.1, -self.2)
+    }
+
     pub fn is_approx_equal(&self, other: &Vector, tolerance: f64) -> bool {
         (self - other).magnitude() <= tolerance
     }

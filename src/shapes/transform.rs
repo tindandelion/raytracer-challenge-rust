@@ -1,10 +1,4 @@
-use std::ops::Deref;
-
-use crate::geometry::{Matrix, Point, Ray, UnitVector, Vector};
-
-pub trait Transformable<T> {
-    fn apply(&self, t: &Transform) -> T;
-}
+use crate::geometry::{MatMul, Matrix, Vector};
 
 pub struct Transform {
     forward: Matrix,
@@ -38,32 +32,15 @@ impl Transform {
         }
     }
 
-    pub fn apply<U, T: Transformable<U>>(&self, arg: &T) -> U {
-        arg.apply(self)
+    pub fn and_then(&self, other: &Transform) -> Transform {
+        Transform {
+            forward: &other.forward * &self.forward,
+            inverse: &self.inverse * &other.inverse,
+        }
     }
-}
 
-impl Transformable<Vector> for Vector {
-    fn apply(&self, t: &Transform) -> Vector {
-        &t.forward * self
-    }
-}
-
-impl Transformable<Vector> for UnitVector {
-    fn apply(&self, t: &Transform) -> Vector {
-        &t.forward * self.deref()
-    }
-}
-
-impl Transformable<Ray> for Ray {
-    fn apply(&self, t: &Transform) -> Ray {
-        self.transform(&t.forward)
-    }
-}
-
-impl Transformable<Point> for Point {
-    fn apply(&self, t: &Transform) -> Point {
-        &t.forward * self
+    pub fn apply<U, T: MatMul<U>>(&self, arg: &T) -> U {
+        arg.matmul(&self.forward)
     }
 }
 
@@ -97,5 +74,21 @@ mod tests {
 
         assert_eq!(translated, Point::new(1., 2., 3.));
         assert_eq!(restored, original)
+    }
+
+    #[test]
+    fn compose_transforms_rotate_around_point() {
+        let rotation_point = Vector(1., 1., 1.);
+        let transform = Transform::translate(&rotation_point.flip())
+            .and_then(&Transform::rotate_x(PI / 2.))
+            .and_then(&Transform::translate(&rotation_point));
+
+        let original = Point::new(1., 2., 3.);
+
+        let transformed = transform.apply(&original);
+        let restored = transform.inverse().apply(&transformed);
+
+        assert_eq!(transformed, Point::new(1., -1., 2.));
+        assert_eq!(restored, original);
     }
 }

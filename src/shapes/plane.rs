@@ -1,4 +1,4 @@
-use crate::geometry::{self, Normal, Point, Ray, UnitVector};
+use crate::geometry::{Normal, Point, Ray, UnitVector};
 
 use super::{Material, Shape, Transform};
 
