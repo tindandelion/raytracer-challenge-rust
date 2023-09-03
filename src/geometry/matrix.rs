@@ -2,7 +2,7 @@ use overload::overload;
 use std::ops::{self};
 use super::{UnitVector, Point, Vector};
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct Matrix([f64; 16]);
 
 overload!((a: ?Matrix) * (b: ?Matrix) -> Matrix { a.mul_matrix(&b) });

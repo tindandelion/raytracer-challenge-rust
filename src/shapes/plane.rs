@@ -1,9 +1,10 @@
-use crate::geometry::{self, Normal, Point, UnitVector};
+use crate::geometry::{self, Normal, Point, Ray, UnitVector};
 
-use super::{Material, Shape};
+use super::{Material, Shape, Transform};
 
 pub struct Plane {
     material: Material,
+    transform: Transform,
 }
 
 impl Plane {
@@ -12,11 +13,17 @@ impl Plane {
     pub const fn new() -> Plane {
         Plane {
             material: Material::default(),
+            transform: Transform::IDENTITY,
         }
     }
 
     pub fn with_material(mut self, m: Material) -> Self {
         self.material = m;
+        self
+    }
+
+    pub fn with_transform(mut self, t: Transform) -> Self {
+        self.transform = t;
         self
     }
 }
@@ -27,22 +34,29 @@ impl Shape for Plane {
     }
 
     fn normal_at(&self, _pt: &Point) -> Normal {
-        Normal::from(&UnitVector::Y)
+        let vector = self.transform.apply(&UnitVector::Y);
+        Normal::from(&vector)
     }
 
-    fn intersect_with(&self, ray: &geometry::Ray) -> Vec<f64> {
-        let direction_y = ray.direction.1;
+    fn intersect_with(&self, ray: &Ray) -> Vec<f64> {
+        let local_ray = self.transform.inverse().apply(ray);
+        let direction_y = local_ray.direction.1;
         if direction_y.abs() < Plane::EPSILON {
             vec![]
         } else {
-            vec![-ray.origin.y() / direction_y]
+            vec![-local_ray.origin.y() / direction_y]
         }
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::geometry::Ray;
+    use std::f64::consts::{PI, SQRT_2};
+
+    use crate::{
+        geometry::{Ray, Vector},
+        shapes::Transform,
+    };
 
     use super::*;
 
@@ -87,5 +101,24 @@ mod tests {
 
         let intersections = PLANE.intersect_with(&ray);
         assert_eq!(intersections, vec![1.])
+    }
+
+    #[test]
+    pub fn apply_transform_to_normal() {
+        let transform = Transform::rotate_x(PI / 4.);
+        let plane = Plane::new().with_transform(transform);
+
+        let normal = plane.normal_at(&Point::ZERO);
+        assert_eq!(normal, Normal::new(0., SQRT_2 / 2., SQRT_2 / 2.))
+    }
+
+    #[test]
+    pub fn apply_transform_to_ray() {
+        let transform = Transform::translate(&Vector(0., -1., 0.));
+        let plane = Plane::new().with_transform(transform);
+
+        let ray = Ray::new(Point::new(0., 1., 0.), UnitVector::Y.flip());
+        let intersections = plane.intersect_with(&ray);
+        assert_eq!(intersections, vec![2.])
     }
 }

@@ -2,6 +2,7 @@ use std::ops::Deref;
 
 use super::{Matrix, Point, UnitVector, Vector};
 
+#[derive(Clone)]
 pub struct Ray {
     pub origin: Point,
     pub direction: UnitVector,
