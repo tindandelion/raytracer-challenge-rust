@@ -5,6 +5,7 @@
     "consts",
     "matmul",
     "raycaster",
+    "recip",
     "rustfmt",
     "tempdir",
     "tempfile"

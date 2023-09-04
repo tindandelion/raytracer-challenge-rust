@@ -59,7 +59,7 @@ fn left_sphere() -> Sphere {
 
 fn left_wall() -> Plane {
     let transform = Transform::rotate_x(PI / 2.)
-        .and_then(&Transform::translate(&Vector(0., 0., 3.3)))
+        .and_then(&Transform::translate(0., 0., 3.3))
         .and_then(&Transform::rotate_y(-PI / 6.));
     Plane::new()
         .with_material(wall_material())
@@ -68,7 +68,7 @@ fn left_wall() -> Plane {
 
 fn right_wall() -> Plane {
     let transform = Transform::rotate_x(PI / 2.)
-        .and_then(&Transform::translate(&Vector(0., 0., 3.3)))
+        .and_then(&Transform::translate(0., 0., 3.3))
         .and_then(&Transform::rotate_y(PI / 6.));
 
     Plane::new()

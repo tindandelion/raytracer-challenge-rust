@@ -25,10 +25,19 @@ impl Transform {
         }
     }
 
-    pub fn translate(vector: &Vector) -> Transform {
+    pub fn translate(tx: f64, ty: f64, tz: f64) -> Transform {
+        let v = Vector(tx, ty, tz);
         Transform {
-            forward: Matrix::translation(&vector),
-            inverse: Matrix::translation(&-vector),
+            forward: Matrix::translation(&v),
+            inverse: Matrix::translation(&v.flip()),
+        }
+    }
+
+    pub fn scale(sx: f64, sy: f64, sz: f64) -> Transform {
+        let v = Vector(sx, sy, sz);
+        Transform {
+            forward: Matrix::diag(&v),
+            inverse: Matrix::diag(&v.recip()),
         }
     }
 
@@ -86,7 +95,7 @@ mod tests {
     #[test]
     fn apply_translation() {
         let original = Point::ZERO;
-        let transform = Transform::translate(&Vector(1., 2., 3.));
+        let transform = Transform::translate(1., 2., 3.);
 
         let translated = transform.apply(&original);
         let restored = transform.inverse().apply(&translated);
@@ -96,11 +105,22 @@ mod tests {
     }
 
     #[test]
+    fn apply_scaling() {
+        let original = Vector(1., 2., 3.);
+        let transform = Transform::scale(2., 3., 4.);
+
+        let scaled = transform.apply(&original);
+        let restored = transform.inverse().apply(&scaled);
+
+        assert_eq!(scaled, Vector(2., 6., 12.));
+        assert_eq!(restored, original);
+    }
+
+    #[test]
     fn compose_transforms_rotate_around_point() {
-        let rotation_point = Vector(1., 1., 1.);
-        let transform = Transform::translate(&rotation_point.flip())
+        let transform = Transform::translate(-1., -1., -1.)
             .and_then(&Transform::rotate_x(PI / 2.))
-            .and_then(&Transform::translate(&rotation_point));
+            .and_then(&Transform::translate(1., 1., 1.));
 
         let original = Point::new(1., 2., 3.);
 

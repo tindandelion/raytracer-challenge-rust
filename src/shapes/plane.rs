@@ -53,10 +53,7 @@ impl Shape for Plane {
 mod tests {
     use std::f64::consts::{PI, SQRT_2};
 
-    use crate::{
-        geometry::{Ray, Vector},
-        shapes::Transform,
-    };
+    use crate::{geometry::Ray, shapes::Transform};
 
     use super::*;
 
@@ -114,7 +111,7 @@ mod tests {
 
     #[test]
     pub fn apply_transform_to_ray() {
-        let transform = Transform::translate(&Vector(0., -1., 0.));
+        let transform = Transform::translate(0., -1., 0.);
         let plane = Plane::new().with_transform(transform);
 
         let ray = Ray::new(Point::new(0., 1., 0.), UnitVector::Y.flip());

@@ -76,6 +76,10 @@ impl Vector {
         )
     }
 
+    pub fn recip(&self) -> Vector {
+        Vector(self.0.recip(), self.1.recip(), self.2.recip())
+    }
+
     pub fn flip(&self) -> Vector {
         Vector(-self.0, -self.1, -self.2)
     }

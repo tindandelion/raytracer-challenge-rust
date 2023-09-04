@@ -33,6 +33,15 @@ impl Matrix {
             0., 0., 0., 0., 
             0., 0., 0., 0.
         ])
+    }
+
+    pub fn diag(v: &Vector) -> Matrix {
+        Matrix([
+            v.0,  0.,   0., 0., 
+             0., v.1,   0., 0., 
+             0.,   0., v.2, 0., 
+             0.,   0.,  0., 1.
+        ])        
     }   
 
     pub fn translation(v: &Vector) -> Matrix {
