@@ -46,8 +46,8 @@ impl Transform {
         }
     }
 
-    pub fn apply<U, T: MatMul<U>>(&self, arg: &T) -> U {
-        arg.matmul(&self.forward)
+    pub fn apply<R, Obj: MatMul<R>>(&self, object: &Obj) -> R {
+        object.matmul(&self.forward)
     }
 }
 
