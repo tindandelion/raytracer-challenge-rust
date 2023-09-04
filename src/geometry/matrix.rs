@@ -53,6 +53,15 @@ impl Matrix {
         ])
     }
 
+    pub fn rotate_y(angle: f64) -> Matrix {
+        Matrix([
+             angle.cos(), 0., angle.sin(), 0.,
+                      0., 1.,          0., 0., 
+            -angle.sin(), 0., angle.cos(), 0., 
+                      0., 0.,          0., 1.
+        ])
+    }
+
     pub fn from_vectors(x: &UnitVector, y: &UnitVector, z: &UnitVector) -> Matrix {
         #[rustfmt::skip]
         let matrix = [

@@ -36,6 +36,12 @@ fn sphere_material(color: Color) -> Material {
     material
 }
 
+fn wall_material() -> Material {
+    let mut material = Material::default_with_color(Color::new(0.6, 0.5, 0.5));
+    material.specular = 0.;
+    material
+}
+
 fn middle_sphere() -> Sphere {
     Sphere::new(Point::new(-0.5, 1., 0.5), 1.0)
         .with_material(sphere_material(Color::new(0.1, 1., 0.5)))
@@ -51,12 +57,23 @@ fn left_sphere() -> Sphere {
         .with_material(sphere_material(Color::new(1., 0.8, 0.1)))
 }
 
-fn backdrop() -> Plane {
-    let mut material = Material::default_with_color(Color::new(0.7, 0.6, 0.6));
-    material.specular = 0.;
-    Plane::new().with_material(material).with_transform(
-        Transform::rotate_x(PI / 2.).and_then(&Transform::translate(&Vector(0., 0., 3.))),
-    )
+fn left_wall() -> Plane {
+    let transform = Transform::rotate_x(PI / 2.)
+        .and_then(&Transform::translate(&Vector(0., 0., 3.3)))
+        .and_then(&Transform::rotate_y(-PI / 6.));
+    Plane::new()
+        .with_material(wall_material())
+        .with_transform(transform)
+}
+
+fn right_wall() -> Plane {
+    let transform = Transform::rotate_x(PI / 2.)
+        .and_then(&Transform::translate(&Vector(0., 0., 3.3)))
+        .and_then(&Transform::rotate_y(PI / 6.));
+
+    Plane::new()
+        .with_material(wall_material())
+        .with_transform(transform)
 }
 
 fn floor() -> Plane {
@@ -69,7 +86,8 @@ fn main() {
     let light = PointLight::new(Color::WHITE, Point::new(-10., 10., -10.));
     let mut world = World::new(light);
     world.add_shape(Box::new(floor()));
-    world.add_shape(Box::new(backdrop()));
+    world.add_shape(Box::new(left_wall()));
+    world.add_shape(Box::new(right_wall()));
     world.add_shape(Box::new(middle_sphere()));
     world.add_shape(Box::new(right_sphere()));
     world.add_shape(Box::new(left_sphere()));

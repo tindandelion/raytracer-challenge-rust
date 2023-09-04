@@ -18,6 +18,13 @@ impl Transform {
         }
     }
 
+    pub fn rotate_y(angle: f64) -> Transform {
+        Transform {
+            forward: Matrix::rotate_y(angle),
+            inverse: Matrix::rotate_y(-angle),
+        }
+    }
+
     pub fn translate(vector: &Vector) -> Transform {
         Transform {
             forward: Matrix::translation(&vector),
@@ -53,7 +60,7 @@ mod tests {
     use super::Transform;
 
     #[test]
-    fn apply_rotation() {
+    fn apply_rotation_around_x() {
         let original = Vector(0., 1., 0.);
         let transform = Transform::rotate_x(PI / 4.);
 
@@ -61,6 +68,18 @@ mod tests {
         let restored = transform.inverse().apply(&rotated);
 
         assert_eq!(rotated, Vector(0., SQRT_2 / 2., SQRT_2 / 2.));
+        assert_eq!(restored, original);
+    }
+
+    #[test]
+    fn apply_rotation_around_y() {
+        let original = Vector(0., 0., 1.);
+        let transform = Transform::rotate_y(PI / 4.);
+
+        let rotated = transform.apply(&original);
+        let restored = transform.inverse().apply(&rotated);
+
+        assert_eq!(rotated, Vector(SQRT_2 / 2., 0., SQRT_2 / 2.));
         assert_eq!(restored, original);
     }
 
