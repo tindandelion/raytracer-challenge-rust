@@ -134,11 +134,13 @@ mod tests {
 
     fn world_with_unit_sphere() -> World {
         let mut world = World::new(LIGHT);
-        world.add_shape(Box::new(Sphere::new(Point::ZERO, 1.)));
+        world.add_shape(Box::new(Sphere::new(1.)));
         world
     }
 
     mod ray_intersections {
+        use crate::shapes::Transform;
+
         use super::*;
 
         const RAY_ORIGIN: Point = Point::new(0., 0., -5.);
@@ -155,7 +157,7 @@ mod tests {
         #[test]
         fn intersect_world_with_ray() {
             let mut world = world_with_unit_sphere();
-            world.add_shape(Box::new(Sphere::new(Point::ZERO, 0.5)));
+            world.add_shape(Box::new(Sphere::new(0.5)));
 
             let intersections = world.intersect_with(&RAY);
             let positions: Vec<f64> = intersections.into_iter().map(|i| i.1).collect();
@@ -199,8 +201,8 @@ mod tests {
         fn cast_ray_hits_closest_object() {
             let mut world = World::new(LIGHT);
 
-            let front_shape = Sphere::new(Point::new(0., 0., -4.), 0.1);
-            let back_shape = Sphere::new(Point::new(0., 0., -1.), 0.1);
+            let front_shape = Sphere::new(0.1).with_transform(Transform::translate(0., 0., -4.));
+            let back_shape = Sphere::new(0.1).with_transform(Transform::translate(0., 0., -1.));
 
             world.add_shape(Box::new(back_shape));
             let front_shape_index = world.add_shape(Box::new(front_shape));

@@ -43,17 +43,20 @@ fn wall_material() -> Material {
 }
 
 fn middle_sphere() -> Sphere {
-    Sphere::new(Point::new(-0.5, 1., 0.5), 1.0)
+    Sphere::new(1.0)
+        .with_transform(Transform::translate(-0.5, 1., 0.5))
         .with_material(sphere_material(Color::new(0.1, 1., 0.5)))
 }
 
 fn right_sphere() -> Sphere {
-    Sphere::new(Point::new(1.5, 0.5, -0.5), 0.5)
+    Sphere::new(0.5)
+        .with_transform(Transform::translate(1.5, 0.5, -0.5))
         .with_material(sphere_material(Color::new(0.5, 1., 0.1)))
 }
 
 fn left_sphere() -> Sphere {
-    Sphere::new(Point::new(-1.5, 0.33, -0.75), 0.33)
+    Sphere::new(0.33)
+        .with_transform(Transform::translate(-1.5, 0.33, -0.75))
         .with_material(sphere_material(Color::new(1., 0.8, 0.1)))
 }
 
