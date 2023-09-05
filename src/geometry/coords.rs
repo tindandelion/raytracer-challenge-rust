@@ -105,9 +105,21 @@ impl From<Point> for Vector {
     }
 }
 
+impl From<UnitVector> for Vector {
+    fn from(value: UnitVector) -> Self {
+        value.0
+    }
+}
+
 impl PartialEq for Vector {
     fn eq(&self, other: &Self) -> bool {
         self.is_approx_equal(other, EQUALITY_TOLERANCE)
+    }
+}
+
+impl PartialEq<UnitVector> for Vector {
+    fn eq(&self, other: &UnitVector) -> bool {
+        self.eq(&other.0)
     }
 }
 
@@ -122,6 +134,10 @@ impl UnitVector {
 
     pub fn flip(&self) -> UnitVector {
         UnitVector(-&self.0)
+    }
+
+    pub const fn v(&self) -> Vector {
+        self.0
     }
 }
 

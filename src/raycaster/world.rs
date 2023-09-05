@@ -77,7 +77,7 @@ impl World {
                 let shape = self.shapes.get(shape_index).unwrap();
                 let point = ray.position(pos);
                 let mut normal = shape.normal_at(&point);
-                let eye_direction = ray.direction.flip();
+                let eye_direction = ray.direction.flip().normalize();
                 let is_inside = normal.dot(&eye_direction) < 0.;
                 if is_inside {
                     normal = normal.flip()
