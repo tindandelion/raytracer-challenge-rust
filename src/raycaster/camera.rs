@@ -19,7 +19,7 @@ impl ViewTransform {
         let view_y = view_z.cross(&view_x).normalize();
 
         let orientation = Matrix::from_vectors(&view_x, &view_y, &view_z);
-        let transform = Matrix::translation(from.as_vector()) * orientation;
+        let transform = Matrix::translation(from) * orientation;
         ViewTransform(transform)
     }
 

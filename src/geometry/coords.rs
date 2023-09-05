@@ -1,16 +1,16 @@
 use overload::overload;
 use std::ops::{self, Deref};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct Vector(pub f64, pub f64, pub f64);
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub struct UnitVector(Vector);
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Point(Vector);
 
 overload!(- (a: ?Vector) -> Vector { Vector(-a.0, -a.1, -a.2) });
 
-overload!((a: ?Vector) + (b: ?Point) -> Point { Point::wrap_vector(a + &b.0) });
+overload!((a: ?Vector) + (b: ?Point) -> Point { Point::from(a + &b.0) });
 overload!((a: ?Vector) + (b: ?Vector) -> Vector { Vector(a.0 + b.0, a.1 + b.1, a.2 + b.2) });
 overload!((a: ?Point) + (b: ?Vector) -> Point { b + a });
 
@@ -26,11 +26,7 @@ impl Point {
     pub const ZERO: Point = Point::new(0., 0., 0.);
 
     pub const fn new(x: f64, y: f64, z: f64) -> Point {
-        Self::wrap_vector(Vector(x, y, z))
-    }
-
-    const fn wrap_vector(pv: Vector) -> Point {
-        Point(pv)
+        Point(Vector(x, y, z))
     }
 
     pub fn x(&self) -> f64 {
@@ -42,6 +38,20 @@ impl Point {
     }
     pub fn z(&self) -> f64 {
         self.0 .2
+    }
+}
+
+impl From<Vector> for Point {
+    fn from(value: Vector) -> Self {
+        Self(value)
+    }
+}
+
+impl Deref for Point {
+    type Target = Vector;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
     }
 }
 
@@ -89,6 +99,18 @@ impl Vector {
     }
 }
 
+impl From<Point> for Vector {
+    fn from(value: Point) -> Self {
+        value.0
+    }
+}
+
+impl PartialEq for Vector {
+    fn eq(&self, other: &Self) -> bool {
+        self.is_approx_equal(other, EQUALITY_TOLERANCE)
+    }
+}
+
 impl UnitVector {
     pub const X: UnitVector = UnitVector(Vector(1., 0., 0.));
     pub const Y: UnitVector = UnitVector(Vector(0., 1., 0.));
@@ -108,24 +130,6 @@ impl Deref for UnitVector {
 
     fn deref(&self) -> &Self::Target {
         &self.0
-    }
-}
-
-impl Point {
-    pub fn as_vector(&self) -> &Vector {
-        &self.0
-    }
-}
-
-impl PartialEq for Vector {
-    fn eq(&self, other: &Self) -> bool {
-        self.is_approx_equal(other, EQUALITY_TOLERANCE)
-    }
-}
-
-impl PartialEq for Point {
-    fn eq(&self, other: &Self) -> bool {
-        (self - other).magnitude() < EQUALITY_TOLERANCE
     }
 }
 

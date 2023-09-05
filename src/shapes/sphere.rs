@@ -1,4 +1,4 @@
-use crate::geometry::{Normal, Point, Ray};
+use crate::geometry::{Normal, Point, Ray, Vector};
 
 use super::{Material, Shape, Transform};
 
@@ -44,7 +44,7 @@ impl Sphere {
     }
 
     fn local_intersect_with(&self, r: &Ray) -> Vec<f64> {
-        let sphere_to_ray = &r.origin.as_vector();
+        let sphere_to_ray = &r.origin;
         let b = 2. * r.scalar_projection_of(&sphere_to_ray);
         let c = sphere_to_ray.magnitude_squared() - self.radius * self.radius;
 
@@ -54,7 +54,7 @@ impl Sphere {
     }
 
     fn local_normal_at(&self, pt: &Point) -> Normal {
-        Normal::from(pt.as_vector())
+        Normal::from(pt as &Vector)
     }
 }
 

@@ -107,11 +107,10 @@ impl MatMul<Matrix> for Matrix {
 
 impl MatMul<Point> for Point {
     fn matmul(&self, m: &Matrix) -> Point {
-        let v = self.as_vector();
         Point::new(
-            v.0 * m.el(0, 0) + v.1 * m.el(0, 1) + v.2 * m.el(0, 2) + m.el(0, 3),
-            v.0 * m.el(1, 0) + v.1 * m.el(1, 1) + v.2 * m.el(1, 2) + m.el(1, 3),
-            v.0 * m.el(2, 0) + v.1 * m.el(2, 1) + v.2 * m.el(2, 2) + m.el(2, 3),
+            self.0 * m.el(0, 0) + self.1 * m.el(0, 1) + self.2 * m.el(0, 2) + m.el(0, 3),
+            self.0 * m.el(1, 0) + self.1 * m.el(1, 1) + self.2 * m.el(1, 2) + m.el(1, 3),
+            self.0 * m.el(2, 0) + self.1 * m.el(2, 1) + self.2 * m.el(2, 2) + m.el(2, 3),
         )
     }
 }

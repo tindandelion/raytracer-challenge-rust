@@ -6,10 +6,6 @@ use super::{Point, UnitVector, Vector};
 pub struct Normal(UnitVector);
 
 impl Normal {
-    pub fn from(v: &Vector) -> Normal {
-        Normal(v.normalize())
-    }
-
     pub fn dot(&self, v: &Vector) -> f64 {
         self.0.dot(v)
     }
@@ -24,6 +20,12 @@ impl Normal {
 
     pub fn over_point(&self, point: &Point) -> Point {
         point + self.0.deref() * 1e-8
+    }
+}
+
+impl From<&Vector> for Normal {
+    fn from(value: &Vector) -> Self {
+        Normal(value.normalize())
     }
 }
 
