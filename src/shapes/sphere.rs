@@ -3,7 +3,6 @@ use crate::geometry::{Normal, Point, Ray, Vector};
 use super::{Material, Shape, Transform};
 
 pub struct Sphere {
-    radius: f64,
     material: Material,
     transform: Transform,
 }
@@ -25,9 +24,10 @@ impl Shape for Sphere {
 }
 
 impl Sphere {
-    pub const fn new(radius: f64) -> Sphere {
+    const RADIUS_SQUARED: f64 = 1.0;
+
+    pub const fn new() -> Sphere {
         Sphere {
-            radius,
             material: Material::default(),
             transform: Transform::IDENTITY,
         }
@@ -44,11 +44,13 @@ impl Sphere {
     }
 
     fn local_intersect_with(&self, r: &Ray) -> Vec<f64> {
-        let sphere_to_ray = &r.origin;
-        let b = 2. * r.scalar_projection_of(&sphere_to_ray);
-        let c = sphere_to_ray.magnitude_squared() - self.radius * self.radius;
+        let sphere_to_ray: Vector = r.origin.into();
 
-        solve_quadratic_equation(1., b, c)
+        let a = r.direction.magnitude_squared();
+        let b = 2. * r.direction.dot(&sphere_to_ray);
+        let c = sphere_to_ray.magnitude_squared() - Self::RADIUS_SQUARED;
+
+        solve_quadratic_equation(a, b, c)
             .map(|(x1, x2)| vec![x1, x2])
             .unwrap_or(vec![])
     }
@@ -72,10 +74,9 @@ fn solve_quadratic_equation(a: f64, b: f64, c: f64) -> Option<(f64, f64)> {
 
 #[cfg(test)]
 mod tests {
-
     use super::Sphere;
 
-    static SPHERE: Sphere = Sphere::new(1.0);
+    static SPHERE: Sphere = Sphere::new();
 
     mod sphere_normals {
         use super::super::Normal;
@@ -161,7 +162,7 @@ mod tests {
 
         #[test]
         fn intersect_translated_sphere_with_ray() {
-            let sphere = Sphere::new(1.0).with_transform(Transform::translate(0., 0., 5.));
+            let sphere = Sphere::new().with_transform(Transform::translate(0., 0., 5.));
 
             let ray = Ray::new(Point::new(0., 0., -5.), UnitVector::Z);
             let xs = sphere.intersect_with(&ray);
@@ -169,8 +170,17 @@ mod tests {
         }
 
         #[test]
+        fn intersect_scaled_sphere_with_ray() {
+            let sphere = Sphere::new().with_transform(Transform::scale(2., 2., 2.));
+
+            let ray = Ray::new(Point::new(0., 0., -5.), UnitVector::Z);
+            let xs = sphere.intersect_with(&ray);
+            assert_eq!(xs, vec![3., 7.]);
+        }
+
+        #[test]
         fn normal_of_translated_sphere() {
-            let sphere = Sphere::new(1.0).with_transform(Transform::translate(0., 1., 0.));
+            let sphere = Sphere::new().with_transform(Transform::translate(0., 1., 0.));
 
             let normal = sphere.normal_at(&Point::new(1., 1., 0.));
             assert_eq!(normal, Normal::new(1., 0., 0.))

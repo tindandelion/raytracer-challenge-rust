@@ -20,11 +20,7 @@ impl Ray {
     }
 
     pub fn position(&self, distance: f64) -> Point {
-        &self.origin + self.direction * distance
-    }
-
-    pub fn scalar_projection_of(&self, v: &Vector) -> f64 {
-        self.direction.dot(v)
+        &self.origin + &self.direction * distance
     }
 }
 
@@ -59,27 +55,6 @@ mod tests {
         assert_eq!(Point::new(3., 3., 4.), ray.position(1.));
         assert_eq!(Point::new(1., 3., 4.), ray.position(-1.));
         assert_eq!(Point::new(4.5, 3., 4.), ray.position(2.5));
-    }
-
-    #[test]
-    fn compute_vector_projection() {
-        let ray = Ray::new(Point::new(2., 3., 4.), Vector(1., 0., 0.).normalize());
-
-        assert_eq!(
-            ray.scalar_projection_of(&Vector(1., 1., 0.)),
-            1.,
-            "Arbitrary vector"
-        );
-        assert_eq!(
-            ray.scalar_projection_of(&Vector(0., 1., 0.)),
-            0.,
-            "Orthogonal vector"
-        );
-        assert_eq!(
-            ray.scalar_projection_of(&Vector(-1., 0., 0.)),
-            -1.,
-            "Opposite direction vector"
-        );
     }
 
     #[test]

@@ -116,18 +116,42 @@ mod tests {
         assert_eq!(restored, original);
     }
 
-    #[test]
-    fn compose_transforms_rotate_around_point() {
-        let transform = Transform::translate(-1., -1., -1.)
-            .and_then(&Transform::rotate_x(PI / 2.))
-            .and_then(&Transform::translate(1., 1., 1.));
+    mod compose_transforms {
+        use super::*;
 
-        let original = Point::new(1., 2., 3.);
+        #[test]
+        fn translate_and_scale() {
+            let original = Point::new(3., 2., 0.);
+            let transform =
+                Transform::translate(1., 1., 0.).and_then(&Transform::scale(0.5, 0.5, 1.));
 
-        let transformed = transform.apply(&original);
-        let restored = transform.inverse().apply(&transformed);
+            let transformed = transform.apply(&original);
+            assert_eq!(transformed, Point::new(2., 1.5, 0.))
+        }
 
-        assert_eq!(transformed, Point::new(1., -1., 2.));
-        assert_eq!(restored, original);
+        #[test]
+        fn scale_and_translate() {
+            let original = Point::new(3., 2., 0.);
+            let transform =
+                Transform::scale(0.5, 0.5, 1.).and_then(&Transform::translate(1., 1., 0.));
+
+            let transformed = transform.apply(&original);
+            assert_eq!(transformed, Point::new(2.5, 2., 0.))
+        }
+
+        #[test]
+        fn rotate_around_point() {
+            let transform = Transform::translate(-1., -1., -1.)
+                .and_then(&Transform::rotate_x(PI / 2.))
+                .and_then(&Transform::translate(1., 1., 1.));
+
+            let original = Point::new(1., 2., 3.);
+
+            let transformed = transform.apply(&original);
+            let restored = transform.inverse().apply(&transformed);
+
+            assert_eq!(transformed, Point::new(1., -1., 2.));
+            assert_eq!(restored, original);
+        }
     }
 }
